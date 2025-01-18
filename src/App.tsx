@@ -59,15 +59,15 @@ const App: React.FC = () => {
   // ログインボタン押下時の処理
   const handleLogin = async (user: UserInfo) => {
     try {
-      await invoke("login_command", {
-        id: user.id,
+      await invoke("teraterm_login", {
+        ip: selectedServer?.ip,
         password: user.password,
-        hostname: user.hostname,
+        username: user.id,
       });
       alert("ログイン成功！");
     } catch (error) {
       console.error("ログインエラー:", error);
-      alert("ログイン失敗");
+      alert("ログイン失敗" + error);
     }
   };
 
