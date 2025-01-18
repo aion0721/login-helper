@@ -24,6 +24,7 @@ const App: React.FC = () => {
   const [selectedServer, setSelectedServer] = useState<ServerInfo | null>(null);
   const [filteredUsers, setFilteredUsers] = useState<UserInfo[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
+  const [selectedSuUser, setSelectedSuUser] = useState<UserInfo | null>(null);
 
   // API呼び出し関数
   const fetchServerData = async () => {
@@ -106,6 +107,23 @@ const App: React.FC = () => {
     }
   };
 
+  // ログインボタン押下時の処理
+  const handleLoginSu = async (user: UserInfo, suUser: UserInfo) => {
+    try {
+      await invoke("teraterm_login_su", {
+        ip: selectedServer?.ip,
+        password: user.password,
+        username: user.id,
+        suUsername: suUser.id, // suユーザ名
+        suPassword: suUser.password, // suユーザのパスワード
+      });
+      alert("ログイン成功！");
+    } catch (error) {
+      console.error("ログインエラー:", error);
+      alert("ログイン失敗" + error);
+    }
+  };
+
   return (
     <Box p={5}>
       <Stack>
@@ -116,23 +134,28 @@ const App: React.FC = () => {
           //onChange={(e) => handleFilter(e.target.value)}
           onChange={(e) => setSid(e.target.value)}
         />
-        <Button onClick={fetchServerData}>aaa</Button>
+        <Button onClick={fetchServerData}>Search SID</Button>
 
+        {filteredServers && (
+          <>
+            <List.Root>
+              <Text>ServerList:{selectedServer?.hostname}</Text>
+              {filteredServers.map((server) => (
+                <List.Item key={server.ip}>
+                  <Button onClick={() => handleServerSelect(server)}>
+                    {server.hostname} ({server.ip})
+                  </Button>
+                </List.Item>
+              ))}
+            </List.Root>
+          </>
+        )}
         {/* サーバリスト */}
-        <List.Root>
-          {filteredServers.map((server) => (
-            <List.Item key={server.ip}>
-              <Button onClick={() => handleServerSelect(server)}>
-                {server.hostname} ({server.ip})
-              </Button>
-            </List.Item>
-          ))}
-        </List.Root>
 
         {/* ユーザ情報 */}
         {selectedServer && (
           <>
-            <Text>ユーザ情報:</Text>
+            <Text>ユーザ情報:{selectedUser?.id}</Text>
             <List.Root>
               {filteredUsers.map((user) => (
                 <List.Item key={user.id}>
@@ -150,6 +173,32 @@ const App: React.FC = () => {
           <Button colorScheme="blue" onClick={() => handleLogin(selectedUser)}>
             Login
           </Button>
+        )}
+
+        {/* ユーザ情報 */}
+        {selectedUser && (
+          <>
+            <Text>SU ユーザ情報:{selectedSuUser?.id}</Text>
+            <List.Root>
+              {filteredUsers.map((user) => (
+                <List.Item key={user.id}>
+                  <Button onClick={() => setSelectedSuUser(user)}>
+                    {user.id}
+                  </Button>
+                </List.Item>
+              ))}
+            </List.Root>
+
+            {/* ログインボタン */}
+            {selectedSuUser && (
+              <Button
+                colorScheme="blue"
+                onClick={() => handleLoginSu(selectedUser, selectedSuUser)}
+              >
+                Su Login
+              </Button>
+            )}
+          </>
         )}
       </Stack>
     </Box>
