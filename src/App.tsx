@@ -17,17 +17,6 @@ interface UserInfo {
 
 const App: React.FC = () => {
   // サーバ情報とユーザ情報のモックデータ
-  const serverData: ServerInfo[] = [
-    { sid: "123", ip: "192.168.1.1", hostname: "Server1" },
-    { sid: "456", ip: "192.168.1.2", hostname: "Server2" },
-    { sid: "123", ip: "192.168.1.3", hostname: "Server3" },
-  ];
-
-  const userData: UserInfo[] = [
-    { sid: "123", hostname: "Server1", id: "user1", password: "pass1" },
-    { sid: "123", hostname: "Server3", id: "user2", password: "pass2" },
-    { sid: "456", hostname: "Server2", id: "user3", password: "pass3" },
-  ];
 
   // 状態管理
   const [sid, setSid] = useState<string>("");
@@ -36,24 +25,70 @@ const App: React.FC = () => {
   const [filteredUsers, setFilteredUsers] = useState<UserInfo[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
 
-  // SID入力時のフィルタリング処理
-  const handleFilter = (inputSid: string) => {
-    setSid(inputSid);
-    const servers = serverData.filter((server) => server.sid === inputSid);
-    setFilteredServers(servers);
-    setSelectedServer(null); // サーバ選択をリセット
-    setFilteredUsers([]); // ユーザ情報もリセット
-    setSelectedUser(null);
+  // API呼び出し関数
+  const fetchServerData = async () => {
+    try {
+      // APIリクエストを送信
+      const response = await fetch(`http://rp.local:3000/server?sid=${sid}`, {
+        method: "GET", // POSTリクエスト
+        headers: {
+          "Content-Type": "application/json", // JSON形式で送信
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTPエラー: ${response.status}`); // ステータスコードが200以外の場合はエラー
+      }
+
+      const data = await response.json(); // 応答データをJSONとしてパース
+
+      // 状態を更新
+      setFilteredServers(data);
+      setSelectedServer(null); // サーバ選択をリセット
+      setFilteredUsers([]); // ユーザ情報もリセット
+      setSelectedUser(null);
+    } catch (err) {
+      console.error("API呼び出しエラー:", err);
+    }
   };
 
   // サーバ選択時の処理
-  const handleServerSelect = (server: ServerInfo) => {
-    setSelectedServer(server);
-    const users = userData.filter(
-      (user) => user.sid === server.sid && user.hostname === server.hostname
-    );
-    setFilteredUsers(users);
-    setSelectedUser(null); // ユーザ選択をリセット
+  const handleServerSelect = async (server: ServerInfo) => {
+    try {
+      // サーバを選択状態に設定
+      setSelectedServer(server);
+
+      // APIからユーザーデータを取得
+      const response = await fetch(
+        `http://rp.local:3000/user?hostname=${server.hostname}`,
+        {
+          method: "GET", // 必要に応じて GET に変更
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // 応答が正常か確認
+      if (!response.ok) {
+        throw new Error(`HTTPエラー: ${response.status}`);
+      }
+
+      // JSONデータをパース
+      const userData = await response.json();
+
+      // ユーザーデータを状態にセット
+      const filteredUsers = userData.filter(
+        (user: UserInfo) =>
+          user.sid === server.sid && user.hostname === server.hostname
+      );
+      setFilteredUsers(filteredUsers);
+      setSelectedUser(null); // ユーザ選択をリセット
+
+      console.log("取得したユーザーデータ:", filteredUsers);
+    } catch (error) {
+      console.error("API呼び出しエラー:", error);
+    }
   };
 
   // ログインボタン押下時の処理
@@ -78,8 +113,10 @@ const App: React.FC = () => {
         <Input
           placeholder="Enter SID"
           value={sid}
-          onChange={(e) => handleFilter(e.target.value)}
+          //onChange={(e) => handleFilter(e.target.value)}
+          onChange={(e) => setSid(e.target.value)}
         />
+        <Button onClick={fetchServerData}>aaa</Button>
 
         {/* サーバリスト */}
         <List.Root>
