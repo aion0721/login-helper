@@ -9,7 +9,8 @@ use std::env;
 use std::process::Command;
 
 #[tauri::command]
-fn teraterm_login(ip: String, username: String, password: String) -> Result<(), String> {
+fn teraterm_login(ip: String, username: String, password: String, state: State<AppState>) -> Result<(), String> {
+    let ttpmacro_path = &state.config.ttpmacro_path;
     // Tera Termマクロの内容を生成
     let macro_content = format!(
         r#"
@@ -43,7 +44,7 @@ fn teraterm_login(ip: String, username: String, password: String) -> Result<(), 
     fs::write(&macro_path, macro_content).map_err(|e| e.to_string())?;
 
     // Tera Termマクロ実行コマンド（ttpmacro.exe）
-    let status = Command::new("C:\\Program Files (x86)\\teraterm\\ttpmacro.exe")
+    let status = Command::new(ttpmacro_path)
         .arg(macro_path.to_str().unwrap())
         .status()
         .map_err(|e| e.to_string())?;
@@ -62,7 +63,9 @@ fn teraterm_login_su(
     password: String,
     su_username: String,
     su_password: String,
+    state: State<AppState>,
 ) -> Result<(), String> {
+    let ttpmacro_path = &state.config.ttpmacro_path;
     // Tera Termマクロの内容を生成
     let macro_content = format!(
         r#"
@@ -119,7 +122,7 @@ fn teraterm_login_su(
     fs::write(&macro_path, macro_content).map_err(|e| e.to_string())?;
 
     // Tera Termマクロ実行コマンド（ttpmacro.exe）
-    let status = Command::new("C:\\Program Files (x86)\\teraterm\\ttpmacro.exe")
+    let status = Command::new(ttpmacro_path)
         .arg(macro_path.to_str().unwrap())
         .status()
         .map_err(|e| e.to_string())?;
@@ -131,9 +134,38 @@ fn teraterm_login_su(
     }
 }
 
+#[derive(serde::Deserialize)]
+struct Config {
+    ttpmacro_path: String,
+}
+
+fn load_config() -> Config {
+    // Tauri v2ではpath()を使用してリソースパスを解決
+    let config_path = env::current_dir()
+        .expect("現在の作業ディレクトリが取得できません")
+        .join("config.toml");
+
+    // ファイル内容を読み込む
+    let config_content = fs::read_to_string(config_path)
+        .expect("設定ファイルが読み込めません");
+    
+    // TOML形式の内容をデシリアライズ
+    toml::from_str(&config_content)
+        .expect("設定ファイルのパースに失敗しました")
+}
+
+use tauri::State;
+use std::sync::Arc;
+
+struct AppState {
+    config: Arc<Config>,
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let config = Arc::new(load_config());
     tauri::Builder::default()
+        .manage(AppState { config })
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![greet, teraterm_login, teraterm_login_su])
         .run(tauri::generate_context!())
