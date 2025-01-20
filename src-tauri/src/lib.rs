@@ -1,11 +1,5 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
-use std::fs;
-use std::env;
+use std::{fs, env};
 use std::process::Command;
 
 #[tauri::command]
@@ -134,9 +128,11 @@ fn teraterm_login_su(
     }
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, serde::Serialize, Clone)]
 struct Config {
     ttpmacro_path: String,
+    server_data_api: String,
+    user_data_api: String,
 }
 
 fn load_config() -> Config {
@@ -145,29 +141,34 @@ fn load_config() -> Config {
         .expect("現在の作業ディレクトリが取得できません")
         .join("config.toml");
 
-    // ファイル内容を読み込む
-    let config_content = fs::read_to_string(config_path)
-        .expect("設定ファイルが読み込めません");
+    // 設定ファイルの内容を読み込む
+    let config_content = fs::read_to_string(&config_path)
+        .unwrap_or_else(|_| panic!("設定ファイルが見つからないか、読み込めません: {:?}", config_path));
     
     // TOML形式の内容をデシリアライズ
     toml::from_str(&config_content)
         .expect("設定ファイルのパースに失敗しました")
 }
 
-use tauri::State;
-use std::sync::Arc;
-
 struct AppState {
-    config: Arc<Config>,
+    config: Config,
 }
+
+
+#[tauri::command]
+fn get_config(state: tauri::State<AppState>) -> Config {
+    state.config.clone()
+}
+
+use tauri::State;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let config = Arc::new(load_config());
+    let config = load_config();
     tauri::Builder::default()
         .manage(AppState { config })
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, teraterm_login, teraterm_login_su])
+        .invoke_handler(tauri::generate_handler![teraterm_login, teraterm_login_su, get_config])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
