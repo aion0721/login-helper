@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Box, Button, Input, Stack, Text, Table } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
+import { CiEraser, CiLock, CiSearch, CiServer } from "react-icons/ci";
 
 interface ServerInfo {
   sid: string;
@@ -150,8 +151,14 @@ const Home: React.FC = () => {
           //onChange={(e) => handleFilter(e.target.value)}
           onChange={(e) => setSid(e.target.value)}
         />
-        <Button onClick={fetchServerData}>Search SID</Button>
-        <Button onClick={handleClear}>CLEAR</Button>
+        <Button colorPalette="teal" onClick={fetchServerData}>
+          <CiSearch />
+          Search SID
+        </Button>
+        <Button onClick={handleClear}>
+          <CiEraser />
+          CLEAR
+        </Button>
 
         {filteredServers && (
           <>
@@ -204,6 +211,7 @@ const Home: React.FC = () => {
                       <Table.Cell>
                         <Button
                           colorScheme="teal"
+                          variant="surface"
                           onClick={() => handleSelectUser(user)}
                         >
                           Select
@@ -219,7 +227,8 @@ const Home: React.FC = () => {
 
         {/* ログインボタン */}
         {selectedUser && (
-          <Button colorScheme="blue" onClick={() => handleLogin(selectedUser)}>
+          <Button colorPalette="teal" onClick={() => handleLogin(selectedUser)}>
+            <CiServer />
             Login
           </Button>
         )}
@@ -243,6 +252,7 @@ const Home: React.FC = () => {
                       <Table.Cell>
                         <Button
                           colorScheme="teal"
+                          variant="surface"
                           onClick={() => setSelectedSuUser(user)}
                         >
                           Select
@@ -257,9 +267,10 @@ const Home: React.FC = () => {
             {/* ログインボタン */}
             {selectedSuUser && (
               <Button
-                colorScheme="blue"
+                colorPalette="teal"
                 onClick={() => handleLoginSu(selectedUser, selectedSuUser)}
               >
+                <CiLock />
                 Su Login
               </Button>
             )}

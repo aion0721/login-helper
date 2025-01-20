@@ -1,5 +1,6 @@
 import { Flex, Image, Text } from "@chakra-ui/react";
 import { Link as ChakraLink } from "@chakra-ui/react";
+import { CiHome, CiSettings } from "react-icons/ci";
 import { Link as ReactRouterLink } from "react-router-dom";
 
 const Header: React.FC = () => {
@@ -14,10 +15,16 @@ const Header: React.FC = () => {
       {/* Spacerで左右の要素を分ける */}
       <Flex flex="1" justify="flex-end" gap={4}>
         <ChakraLink asChild>
-          <ReactRouterLink to="/">Home</ReactRouterLink>
+          <ReactRouterLink to="/">
+            <CiHome />
+            Home
+          </ReactRouterLink>
         </ChakraLink>
         <ChakraLink asChild>
-          <ReactRouterLink to="/config">Config</ReactRouterLink>
+          <ReactRouterLink to="/config">
+            <CiSettings />
+            Config
+          </ReactRouterLink>
         </ChakraLink>
       </Flex>
     </Flex>
