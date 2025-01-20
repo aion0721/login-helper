@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button, Input, List, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, Input, Stack, Text, Table } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 
 interface ServerInfo {
@@ -155,33 +155,65 @@ const Home: React.FC = () => {
 
         {filteredServers && (
           <>
-            <List.Root>
-              <Text>ServerList:{selectedServer?.hostname}</Text>
-              {filteredServers.map((server) => (
-                <List.Item key={server.ip}>
-                  <Button onClick={() => handleServerSelect(server)}>
-                    {server.hostname} ({server.ip})
-                  </Button>
-                </List.Item>
-              ))}
-            </List.Root>
+            <Text mb={4}>Server List: {selectedServer?.hostname}</Text>
+            <Table.Root size="md">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>Hostname</Table.ColumnHeader>
+                  <Table.ColumnHeader>IP Address</Table.ColumnHeader>
+                  <Table.ColumnHeader>Action</Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {filteredServers.map((server) => (
+                  <Table.Row key={server.ip}>
+                    <Table.Cell>{server.hostname}</Table.Cell>
+                    <Table.Cell>{server.ip}</Table.Cell>
+                    <Table.Cell>
+                      <Button
+                        colorScheme="teal"
+                        onClick={() => handleServerSelect(server)}
+                      >
+                        Select
+                      </Button>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
           </>
         )}
+
         {/* サーバリスト */}
 
-        {/* ユーザ情報 */}
         {selectedServer && (
           <>
-            <Text>ユーザ情報:{selectedUser?.id}</Text>
-            <List.Root>
-              {filteredUsers.map((user) => (
-                <List.Item key={user.id}>
-                  <Button onClick={() => handleSelectUser(user)}>
-                    {user.id}
-                  </Button>
-                </List.Item>
-              ))}
-            </List.Root>
+            <Text mb={4}>ユーザ情報: {selectedUser?.id}</Text>
+            <Box overflowX="auto">
+              <Table.Root size="md">
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>User ID</Table.ColumnHeader>
+                    <Table.ColumnHeader>Action</Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {filteredUsers.map((user) => (
+                    <Table.Row key={user.id}>
+                      <Table.Cell>{user.id}</Table.Cell>
+                      <Table.Cell>
+                        <Button
+                          colorScheme="teal"
+                          onClick={() => handleSelectUser(user)}
+                        >
+                          Select
+                        </Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Box>
           </>
         )}
 
@@ -195,16 +227,32 @@ const Home: React.FC = () => {
         {/* ユーザ情報 */}
         {selectedUser && (
           <>
-            <Text>SU ユーザ情報:{selectedSuUser?.id}</Text>
-            <List.Root>
-              {filteredUsers.map((user) => (
-                <List.Item key={user.id}>
-                  <Button onClick={() => setSelectedSuUser(user)}>
-                    {user.id}
-                  </Button>
-                </List.Item>
-              ))}
-            </List.Root>
+            <Text mb={4}>SU ユーザ情報: {selectedSuUser?.id}</Text>
+            <Box overflowX="auto">
+              <Table.Root size="md">
+                <Table.Header>
+                  <Table.Row>
+                    <Table.ColumnHeader>User ID</Table.ColumnHeader>
+                    <Table.ColumnHeader>Action</Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {filteredUsers.map((user) => (
+                    <Table.Row key={user.id}>
+                      <Table.Cell>{user.id}</Table.Cell>
+                      <Table.Cell>
+                        <Button
+                          colorScheme="teal"
+                          onClick={() => setSelectedSuUser(user)}
+                        >
+                          Select
+                        </Button>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Box>
 
             {/* ログインボタン */}
             {selectedSuUser && (
