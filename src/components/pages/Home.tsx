@@ -48,9 +48,19 @@ const Home: React.FC = () => {
       setSelectedServer(null); // サーバ選択をリセット
       setFilteredUsers([]); // ユーザ情報もリセット
       setSelectedUser(null);
+      setSelectedSuUser(null);
     } catch (err) {
       console.error("API呼び出しエラー:", err);
     }
+  };
+
+  const handleClear = () => {
+    setSid("");
+    setFilteredServers([]);
+    setSelectedServer(null);
+    setFilteredUsers([]);
+    setSelectedUser(null);
+    setSelectedSuUser(null);
   };
 
   // サーバ選択時の処理
@@ -85,6 +95,7 @@ const Home: React.FC = () => {
       );
       setFilteredUsers(filteredUsers);
       setSelectedUser(null); // ユーザ選択をリセット
+      setSelectedSuUser(null); // ユーザ選択をリセット
 
       console.log("取得したユーザーデータ:", filteredUsers);
     } catch (error) {
@@ -124,6 +135,11 @@ const Home: React.FC = () => {
     }
   };
 
+  const handleSelectUser = (user: UserInfo) => {
+    setSelectedUser(user);
+    setSelectedSuUser(null);
+  };
+
   return (
     <Box p={5}>
       <Stack>
@@ -135,6 +151,7 @@ const Home: React.FC = () => {
           onChange={(e) => setSid(e.target.value)}
         />
         <Button onClick={fetchServerData}>Search SID</Button>
+        <Button onClick={handleClear}>CLEAR</Button>
 
         {filteredServers && (
           <>
@@ -159,7 +176,7 @@ const Home: React.FC = () => {
             <List.Root>
               {filteredUsers.map((user) => (
                 <List.Item key={user.id}>
-                  <Button onClick={() => setSelectedUser(user)}>
+                  <Button onClick={() => handleSelectUser(user)}>
                     {user.id}
                   </Button>
                 </List.Item>
