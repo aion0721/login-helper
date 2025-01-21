@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { motion } from "framer-motion";
 
 interface Config {
   ttpmacro_path: string;
@@ -21,12 +22,19 @@ const Config: React.FC = () => {
     fetchConfig();
   }, []);
   return (
-    <div>
-      <h1>Config</h1>
-      <p> ttpmacro_path:{config?.ttpmacro_path}</p>
-      <p> server_data_api:{config?.server_data_api}</p>
-      <p> user_data_api:{config?.user_data_api}</p>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, x: 100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -100 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div>
+        <h1>Config</h1>
+        <p> ttpmacro_path:{config?.ttpmacro_path}</p>
+        <p> server_data_api:{config?.server_data_api}</p>
+        <p> user_data_api:{config?.user_data_api}</p>
+      </div>
+    </motion.div>
   );
 };
 
