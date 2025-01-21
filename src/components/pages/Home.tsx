@@ -3,6 +3,8 @@ import { Box, Button, Input, Stack, Text, Table } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import { CiEraser, CiLock, CiSearch, CiServer } from "react-icons/ci";
 import { motion } from "framer-motion";
+import { useAppContext } from "../../context/AppContext";
+import { Navigate, useNavigate } from "react-router";
 
 interface ServerInfo {
   sid: string;
@@ -18,12 +20,13 @@ interface UserInfo {
 }
 
 const Home: React.FC = () => {
+  const { Sid, setSid, selectedServer, setSelectedServer } = useAppContext();
+  const navigate = useNavigate();
+
   // サーバ情報とユーザ情報のモックデータ
 
   // 状態管理
-  const [sid, setSid] = useState<string>("");
   const [filteredServers, setFilteredServers] = useState<ServerInfo[]>([]);
-  const [selectedServer, setSelectedServer] = useState<ServerInfo | null>(null);
   const [filteredUsers, setFilteredUsers] = useState<UserInfo[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
   const [selectedSuUser, setSelectedSuUser] = useState<UserInfo | null>(null);
@@ -32,7 +35,7 @@ const Home: React.FC = () => {
   const fetchServerData = async () => {
     try {
       // APIリクエストを送信
-      const response = await fetch(`http://rp.local:3000/server?sid=${sid}`, {
+      const response = await fetch(`http://rp.local:3000/server?sid=${Sid}`, {
         method: "GET", // POSTリクエスト
         headers: {
           "Content-Type": "application/json", // JSON形式で送信
@@ -103,6 +106,7 @@ const Home: React.FC = () => {
     } catch (error) {
       console.error("API呼び出しエラー:", error);
     }
+    navigate("/server");
   };
 
   // ログインボタン押下時の処理
@@ -154,7 +158,7 @@ const Home: React.FC = () => {
           {/* SID入力 */}
           <Input
             placeholder="Enter SID"
-            value={sid}
+            value={Sid}
             //onChange={(e) => handleFilter(e.target.value)}
             onChange={(e) => setSid(e.target.value)}
           />

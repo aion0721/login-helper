@@ -133,6 +133,8 @@ struct Config {
     ttpmacro_path: String,
     server_data_api: String,
     user_data_api: String,
+    default_login_user: String,
+    default_login_su: String
 }
 
 fn load_config() -> Config {
