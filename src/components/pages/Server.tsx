@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Input, Stack, Text, Table } from "@chakra-ui/react";
+import { Box, Button, Stack, Table } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
-import { CiEraser, CiLock, CiSearch, CiServer } from "react-icons/ci";
+import { CiLock, CiServer } from "react-icons/ci";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
 
@@ -27,82 +27,54 @@ interface Config {
 }
 
 const Server: React.FC = () => {
-  const { Sid, selectedServer, setSelectedServer } = useAppContext();
-  const [config, setConfig] = React.useState<Config | null>(null);
+  const { selectedServer } = useAppContext();
 
   // サーバ情報とユーザ情報のモックデータ
 
   // 状態管理
-  const [users, setUsers] = useState<UserInfo[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
   const [selectedSuUser, setSelectedSuUser] = useState<UserInfo | null>(null);
-  const [defaultLoginUser, setDefaultLoginUser] = useState<string>("");
-  const [defaultLoginSu, setDefaultLoginSu] = useState<string>("");
 
-  // サーバ選択時の処理
-  const fetchData = async (server: ServerInfo) => {
+  const fetchAllData = async (server: ServerInfo) => {
     try {
-      // サーバを選択状態に設定
-      setSelectedServer(server);
+      // Configを取得
+      const config = await invoke<Config>("get_config");
 
       // APIからユーザーデータを取得
       const response = await fetch(
-        `http://rp.local:3000/user?hostname=${server.hostname}`,
+        `${config.user_data_api}${server.hostname}`,
         {
-          method: "GET", // 必要に応じて GET に変更
-          headers: {
-            "Content-Type": "application/json",
-          },
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
         }
       );
 
-      // 応答が正常か確認
-      if (!response.ok) {
-        throw new Error(`HTTPエラー: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTPエラー: ${response.status}`);
 
-      // JSONデータをパース
-      const userData = await response.json();
+      const userData: UserInfo[] = await response.json();
 
-      // ユーザーデータを状態にセット
-      const filteredUsers = userData.filter(
-        (user: UserInfo) =>
-          user.sid === server.sid && user.hostname === server.hostname
-      );
-      setUsers(filteredUsers);
       // 条件に応じて selectedUser と selectedSuUser を設定
-      userData.forEach((user: UserInfo) => {
-        if (user.id === defaultLoginUser) {
-          setSelectedUser(user); // id が 'pi' の場合
-        } else if (user.id === defaultLoginSu) {
-          setSelectedSuUser(user); // id が 'root' の場合
-        }
-      });
+      const user = userData.find(
+        (user) => user.id === config.default_login_user
+      );
+      const suUser = userData.find(
+        (user) => user.id === config.default_login_su
+      );
 
-      console.log("取得したユーザーデータ:", filteredUsers);
+      setSelectedUser(user || null);
+      setSelectedSuUser(suUser || null);
+
+      console.log("取得したユーザーデータ:", userData);
     } catch (error) {
       console.error("API呼び出しエラー:", error);
     }
   };
 
   useEffect(() => {
-    async function fetchConfig() {
-      try {
-        const result = await invoke<Config>("get_config");
-        setConfig(result);
-        setDefaultLoginUser(result.default_login_user);
-        setDefaultLoginSu(result.default_login_su);
-      } catch (err) {
-        console.error("API呼び出しエラー:", err);
-      }
+    if (selectedServer) {
+      fetchAllData(selectedServer); // サーバ選択時に一連の処理を実行
     }
-    fetchConfig();
-  }, []);
-  useEffect(() => {
-    if (selectedServer && defaultLoginUser && defaultLoginSu) {
-      fetchData(selectedServer); // Configが取得された後にのみ実行
-    }
-  }, [selectedServer, defaultLoginUser, defaultLoginSu]); // 依存関係を追加
+  }, [selectedServer]);
 
   // ログインボタン押下時の処理
   const handleLogin = async (user: UserInfo) => {
@@ -156,7 +128,7 @@ const Server: React.FC = () => {
             <Table.Body>
               <Table.Row>
                 <Table.Cell>Sid</Table.Cell>
-                <Table.Cell>{Sid}</Table.Cell>
+                <Table.Cell>{selectedServer?.sid}</Table.Cell>
               </Table.Row>
               <Table.Row>
                 <Table.Cell>IP</Table.Cell>

@@ -4,7 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { CiEraser, CiLock, CiSearch, CiServer } from "react-icons/ci";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
-import { Navigate, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 interface ServerInfo {
   sid: string;
