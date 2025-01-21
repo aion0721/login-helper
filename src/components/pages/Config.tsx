@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { motion } from "framer-motion";
+import { Heading, Table } from "@chakra-ui/react";
 
 interface Config {
   ttpmacro_path: string;
@@ -28,12 +29,29 @@ const Config: React.FC = () => {
       exit={{ opacity: 0, x: -100 }}
       transition={{ duration: 0.5 }}
     >
-      <div>
-        <h1>Config</h1>
-        <p> ttpmacro_path:{config?.ttpmacro_path}</p>
-        <p> server_data_api:{config?.server_data_api}</p>
-        <p> user_data_api:{config?.user_data_api}</p>
-      </div>
+      <Heading>Config</Heading>
+      <Table.Root size="md">
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeader>Config</Table.ColumnHeader>
+            <Table.ColumnHeader>Value</Table.ColumnHeader>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          <Table.Row>
+            <Table.Cell>ttpmacro_path</Table.Cell>
+            <Table.Cell>{config?.ttpmacro_path}</Table.Cell>
+          </Table.Row>
+          <Table.Row>
+            <Table.Cell>server_data_api</Table.Cell>
+            <Table.Cell>{config?.server_data_api}</Table.Cell>
+          </Table.Row>
+          <Table.Row>
+            <Table.Cell>user_data_api</Table.Cell>
+            <Table.Cell>{config?.user_data_api}</Table.Cell>
+          </Table.Row>
+        </Table.Body>
+      </Table.Root>
     </motion.div>
   );
 };
