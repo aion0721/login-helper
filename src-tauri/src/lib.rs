@@ -1,4 +1,5 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+use chrono::Local;
 use std::{fs, env};
 use std::process::Command;
 use encoding_rs::SHIFT_JIS;
@@ -32,10 +33,18 @@ fn teraterm_login(ip: String, username: String, password: String, state: State<A
         return Err("マクロのエンコードに失敗しました。".into());
     }
 
+    // 現在の日付と時刻を取得（ミリ秒まで）
+    let now = Local::now();
+    let timestamp = now.format("%Y-%m-%d_%H-%M-%S.%3f").to_string();
+
+    // 動的なファイル名を生成
+    let file_name = format!("login_{}.ttl", timestamp);
+
+
     // マクロファイルの保存先パス
     let macro_path = env::current_dir()
     .expect("現在の作業ディレクトリが取得できません")
-    .join("login.ttl");
+    .join(file_name);
 
     // マクロファイルを書き込み
     fs::write(&macro_path, encoded_content).map_err(|e| e.to_string())?;
@@ -48,6 +57,11 @@ fn teraterm_login(ip: String, username: String, password: String, state: State<A
         .map_err(|e| e.to_string())?;
 
     if status.success() {
+        // 処理成功時にTTLファイルを削除
+        if let Err(e) = fs::remove_file(&macro_path) {
+            eprintln!("ファイル削除に失敗しました: {}", e);
+            return Err("処理は成功しましたが、ファイル削除に失敗しました。".into());
+        }
         Ok(())
     } else {
         Err("Tera Termマクロの実行に失敗しました。".into())
@@ -119,10 +133,19 @@ fn teraterm_login_su(
         return Err("マクロのエンコードに失敗しました。".into());
     }
 
+    // 現在の日付と時刻を取得（ミリ秒まで）
+    let now = Local::now();
+    let timestamp = now.format("%Y-%m-%d_%H-%M-%S.%3f").to_string();
+
+    // 動的なファイル名を生成
+    let file_name = format!("login_{}.ttl", timestamp);
+
+
     // マクロファイルの保存先パス
     let macro_path = env::current_dir()
-        .expect("現在の作業ディレクトリが取得できません")
-        .join("login.ttl");
+    .expect("現在の作業ディレクトリが取得できません")
+    .join(file_name);
+
 
     // マクロファイルを書き込み
     fs::write(&macro_path, encoded_content).map_err(|e| e.to_string())?;
@@ -134,6 +157,11 @@ fn teraterm_login_su(
         .map_err(|e| e.to_string())?;
 
     if status.success() {
+        // 処理成功時にTTLファイルを削除
+        if let Err(e) = fs::remove_file(&macro_path) {
+            eprintln!("ファイル削除に失敗しました: {}", e);
+            return Err("処理は成功しましたが、ファイル削除に失敗しました。".into());
+        }
         Ok(())
     } else {
         Err("Tera Termマクロの実行に失敗しました。".into())
