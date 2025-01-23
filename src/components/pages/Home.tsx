@@ -165,6 +165,12 @@ const Home: React.FC = () => {
     setSelectedSuUser(null);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      fetchServerData();
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 100 }} // 初期状態: 右からスライドイン
@@ -180,6 +186,7 @@ const Home: React.FC = () => {
             value={Sid}
             //onChange={(e) => handleFilter(e.target.value)}
             onChange={(e) => setSid(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           <Button colorPalette="teal" onClick={fetchServerData}>
             <CiSearch />
