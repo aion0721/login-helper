@@ -42,9 +42,12 @@ interface Config {
 }
 
 const Home: React.FC = () => {
-  const { Sid, setSid, selectedServer, setSelectedServer } = useAppContext();
+  const { Sid, setSid, setSelectedServer } = useAppContext();
   const [config, setConfig] = React.useState<Config | null>(null);
   const [loading, setLoading] = useState(false);
+  // 状態管理
+  const [filteredServers, setFilteredServers] = useState<ServerInfo[]>([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,12 +60,11 @@ const Home: React.FC = () => {
       }
     }
     fetchConfig();
+    setSid("");
+    setSelectedServer(null);
   }, []);
 
   // サーバ情報とユーザ情報のモックデータ
-
-  // 状態管理
-  const [filteredServers, setFilteredServers] = useState<ServerInfo[]>([]);
 
   // API呼び出し関数
   const fetchServerData = async () => {
@@ -241,58 +243,58 @@ const Home: React.FC = () => {
             CLEAR
           </Button>
 
-          {loading && (
+          {loading ? (
             <Box mt={5}>
               <Spinner size="xl" color="teal.500" />
               <Text mt={2}>データを取得中...</Text>
             </Box>
-          )}
-          {!loading && filteredServers && (
-            <>
-              <Text mb={4}>Server List: {selectedServer?.hostname}</Text>
-              <Table.Root size="md">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader>Hostname</Table.ColumnHeader>
-                    <Table.ColumnHeader>IP Address</Table.ColumnHeader>
-                    <Table.ColumnHeader>Action</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {filteredServers.map((server) => (
-                    <Table.Row key={server.ip}>
-                      <Table.Cell>{server.hostname}</Table.Cell>
-                      <Table.Cell>{server.ip}</Table.Cell>
-                      <Table.Cell>
-                        <Stack direction="row" justify="center">
-                          <Button
-                            colorPalette="cyan"
-                            onClick={() => handleLogin(server)}
-                          >
-                            <CiServer />
-                            Login
-                          </Button>
-                          <Button
-                            colorPalette="teal"
-                            onClick={() => handleLoginSu(server)}
-                          >
-                            <CiLock />
-                            SuLogin
-                          </Button>
-                          <Button
-                            colorPalette="yellow"
-                            onClick={() => handleServerSelect(server)}
-                          >
-                            <CiViewList />
-                            Detail
-                          </Button>
-                        </Stack>
-                      </Table.Cell>
+          ) : (
+            filteredServers.length > 0 && (
+              <>
+                <Table.Root size="md">
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.ColumnHeader>Hostname</Table.ColumnHeader>
+                      <Table.ColumnHeader>IP Address</Table.ColumnHeader>
+                      <Table.ColumnHeader>Action</Table.ColumnHeader>
                     </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table.Root>
-            </>
+                  </Table.Header>
+                  <Table.Body>
+                    {filteredServers.map((server) => (
+                      <Table.Row key={server.ip}>
+                        <Table.Cell>{server.hostname}</Table.Cell>
+                        <Table.Cell>{server.ip}</Table.Cell>
+                        <Table.Cell>
+                          <Stack direction="row" justify="center">
+                            <Button
+                              colorPalette="cyan"
+                              onClick={() => handleLogin(server)}
+                            >
+                              <CiServer />
+                              Login
+                            </Button>
+                            <Button
+                              colorPalette="teal"
+                              onClick={() => handleLoginSu(server)}
+                            >
+                              <CiLock />
+                              SuLogin
+                            </Button>
+                            <Button
+                              colorPalette="yellow"
+                              onClick={() => handleServerSelect(server)}
+                            >
+                              <CiViewList />
+                              Detail
+                            </Button>
+                          </Stack>
+                        </Table.Cell>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Root>
+              </>
+            )
           )}
         </Stack>
       </Box>
