@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, Input, Stack, Text, Table } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
-import { CiEraser, CiLock, CiSearch, CiServer } from "react-icons/ci";
+import {
+  CiEraser,
+  CiLock,
+  CiSearch,
+  CiServer,
+  CiViewList,
+} from "react-icons/ci";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
 import { useNavigate } from "react-router";
@@ -23,6 +29,8 @@ interface Config {
   ttpmacro_path: string;
   server_data_api: string;
   user_data_api: string;
+  default_login_user: string;
+  default_login_su: string;
 }
 
 const Home: React.FC = () => {
@@ -46,9 +54,6 @@ const Home: React.FC = () => {
 
   // 状態管理
   const [filteredServers, setFilteredServers] = useState<ServerInfo[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<UserInfo[]>([]);
-  const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
-  const [selectedSuUser, setSelectedSuUser] = useState<UserInfo | null>(null);
 
   // API呼び出し関数
   const fetchServerData = async () => {
@@ -70,9 +75,6 @@ const Home: React.FC = () => {
       // 状態を更新
       setFilteredServers(data);
       setSelectedServer(null); // サーバ選択をリセット
-      setFilteredUsers([]); // ユーザ情報もリセット
-      setSelectedUser(null);
-      setSelectedSuUser(null);
     } catch (err) {
       console.error("API呼び出しエラー:", err);
     }
@@ -82,9 +84,6 @@ const Home: React.FC = () => {
     setSid("");
     setFilteredServers([]);
     setSelectedServer(null);
-    setFilteredUsers([]);
-    setSelectedUser(null);
-    setSelectedSuUser(null);
   };
 
   // サーバ選択時の処理
@@ -117,9 +116,6 @@ const Home: React.FC = () => {
         (user: UserInfo) =>
           user.sid === server.sid && user.hostname === server.hostname
       );
-      setFilteredUsers(filteredUsers);
-      setSelectedUser(null); // ユーザ選択をリセット
-      setSelectedSuUser(null); // ユーザ選択をリセット
 
       console.log("取得したユーザーデータ:", filteredUsers);
     } catch (error) {
@@ -129,14 +125,32 @@ const Home: React.FC = () => {
   };
 
   // ログインボタン押下時の処理
-  const handleLogin = async (user: UserInfo) => {
+  const handleLogin = async (server: ServerInfo) => {
     try {
+      const response = await fetch(
+        `${config?.user_data_api}${server?.hostname}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const users: UserInfo[] = await response.json();
+
+      const defaultUser = users.find(
+        (user) => user.id === config?.default_login_user
+      );
+
+      if (!defaultUser) {
+        console.log(response);
+        throw new Error("デフォルトユーザが見つかりません");
+      }
+
       await invoke("teraterm_login", {
-        ip: selectedServer?.ip,
-        password: user.password,
-        username: user.id,
+        ip: server?.ip,
+        password: defaultUser.password,
+        username: defaultUser.id,
       });
-      alert("ログイン成功！");
     } catch (error) {
       console.error("ログインエラー:", error);
       alert("ログイン失敗" + error);
@@ -144,25 +158,43 @@ const Home: React.FC = () => {
   };
 
   // ログインボタン押下時の処理
-  const handleLoginSu = async (user: UserInfo, suUser: UserInfo) => {
+  const handleLoginSu = async (server: ServerInfo) => {
     try {
+      const response = await fetch(
+        `${config?.user_data_api}${server?.hostname}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const users: UserInfo[] = await response.json();
+
+      const defaultUser = users.find(
+        (user) => user.id === config?.default_login_user
+      );
+
+      if (!defaultUser) {
+        console.log(response);
+        throw new Error("デフォルトユーザが見つかりません");
+      }
+      // SUユーザーを検索
+      const suUser = users.find((user) => user.id === config?.default_login_su);
+      if (!suUser) {
+        throw new Error("SUユーザが見つかりません");
+      }
+
       await invoke("teraterm_login_su", {
-        ip: selectedServer?.ip,
-        password: user.password,
-        username: user.id,
+        ip: server?.ip,
+        password: defaultUser.password,
+        username: defaultUser.id,
         suUsername: suUser.id, // suユーザ名
         suPassword: suUser.password, // suユーザのパスワード
       });
-      alert("ログイン成功！");
     } catch (error) {
       console.error("ログインエラー:", error);
       alert("ログイン失敗" + error);
     }
-  };
-
-  const handleSelectUser = (user: UserInfo) => {
-    setSelectedUser(user);
-    setSelectedSuUser(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -214,106 +246,34 @@ const Home: React.FC = () => {
                       <Table.Cell>{server.hostname}</Table.Cell>
                       <Table.Cell>{server.ip}</Table.Cell>
                       <Table.Cell>
-                        <Button
-                          colorScheme="teal"
-                          onClick={() => handleServerSelect(server)}
-                        >
-                          Select
-                        </Button>
+                        <Stack direction="row" justify="center">
+                          <Button
+                            colorPalette="cyan"
+                            onClick={() => handleLogin(server)}
+                          >
+                            <CiServer />
+                            Login
+                          </Button>
+                          <Button
+                            colorPalette="teal"
+                            onClick={() => handleLoginSu(server)}
+                          >
+                            <CiLock />
+                            SuLogin
+                          </Button>
+                          <Button
+                            colorPalette="yellow"
+                            onClick={() => handleServerSelect(server)}
+                          >
+                            <CiViewList />
+                            Detail
+                          </Button>
+                        </Stack>
                       </Table.Cell>
                     </Table.Row>
                   ))}
                 </Table.Body>
               </Table.Root>
-            </>
-          )}
-
-          {/* サーバリスト */}
-
-          {selectedServer && (
-            <>
-              <Text mb={4}>ユーザ情報: {selectedUser?.id}</Text>
-              <Box overflowX="auto">
-                <Table.Root size="md">
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.ColumnHeader>User ID</Table.ColumnHeader>
-                      <Table.ColumnHeader>Action</Table.ColumnHeader>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {filteredUsers.map((user) => (
-                      <Table.Row key={user.id}>
-                        <Table.Cell>{user.id}</Table.Cell>
-                        <Table.Cell>
-                          <Button
-                            colorScheme="teal"
-                            variant="surface"
-                            onClick={() => handleSelectUser(user)}
-                          >
-                            Select
-                          </Button>
-                        </Table.Cell>
-                      </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table.Root>
-              </Box>
-            </>
-          )}
-
-          {/* ログインボタン */}
-          {selectedUser && (
-            <Button
-              colorPalette="teal"
-              onClick={() => handleLogin(selectedUser)}
-            >
-              <CiServer />
-              Login
-            </Button>
-          )}
-
-          {/* ユーザ情報 */}
-          {selectedUser && (
-            <>
-              <Text mb={4}>SU ユーザ情報: {selectedSuUser?.id}</Text>
-              <Box overflowX="auto">
-                <Table.Root size="md">
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.ColumnHeader>User ID</Table.ColumnHeader>
-                      <Table.ColumnHeader>Action</Table.ColumnHeader>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {filteredUsers.map((user) => (
-                      <Table.Row key={user.id}>
-                        <Table.Cell>{user.id}</Table.Cell>
-                        <Table.Cell>
-                          <Button
-                            colorScheme="teal"
-                            variant="surface"
-                            onClick={() => setSelectedSuUser(user)}
-                          >
-                            Select
-                          </Button>
-                        </Table.Cell>
-                      </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table.Root>
-              </Box>
-
-              {/* ログインボタン */}
-              {selectedSuUser && (
-                <Button
-                  colorPalette="teal"
-                  onClick={() => handleLoginSu(selectedUser, selectedSuUser)}
-                >
-                  <CiLock />
-                  Su Login
-                </Button>
-              )}
             </>
           )}
         </Stack>
