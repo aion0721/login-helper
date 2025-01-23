@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, Input, Stack, Text, Table } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import { CiEraser, CiLock, CiSearch, CiServer } from "react-icons/ci";
@@ -19,9 +19,28 @@ interface UserInfo {
   password: string;
 }
 
+interface Config {
+  ttpmacro_path: string;
+  server_data_api: string;
+  user_data_api: string;
+}
+
 const Home: React.FC = () => {
   const { Sid, setSid, selectedServer, setSelectedServer } = useAppContext();
+  const [config, setConfig] = React.useState<Config | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    async function fetchConfig() {
+      try {
+        const result = await invoke<Config>("get_config");
+        setConfig(result);
+      } catch (err) {
+        console.error("API呼び出しエラー:", err);
+      }
+    }
+    fetchConfig();
+  }, []);
 
   // サーバ情報とユーザ情報のモックデータ
 
@@ -35,7 +54,7 @@ const Home: React.FC = () => {
   const fetchServerData = async () => {
     try {
       // APIリクエストを送信
-      const response = await fetch(`http://rp.local:3000/server?sid=${Sid}`, {
+      const response = await fetch(`${config?.server_data_api}${Sid}`, {
         method: "GET", // POSTリクエスト
         headers: {
           "Content-Type": "application/json", // JSON形式で送信
@@ -76,7 +95,7 @@ const Home: React.FC = () => {
 
       // APIからユーザーデータを取得
       const response = await fetch(
-        `http://rp.local:3000/user?hostname=${server.hostname}`,
+        `${config?.user_data_api}${server.hostname}`,
         {
           method: "GET", // 必要に応じて GET に変更
           headers: {
