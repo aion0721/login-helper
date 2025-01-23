@@ -1,6 +1,7 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 use std::{fs, env};
 use std::process::Command;
+use encoding_rs::SHIFT_JIS;
 
 #[tauri::command]
 fn teraterm_login(ip: String, username: String, password: String, state: State<AppState>) -> Result<(), String> {
@@ -29,13 +30,19 @@ fn teraterm_login(ip: String, username: String, password: String, state: State<A
         password = password,
     );
 
+    let (encoded_content, _, had_errors) = SHIFT_JIS.encode(&macro_content);
+    if had_errors {
+        return Err("マクロのエンコードに失敗しました。".into());
+    }
+
     // マクロファイルの保存先パス
     let macro_path = env::current_dir()
     .expect("現在の作業ディレクトリが取得できません")
     .join("login.ttl");
 
     // マクロファイルを書き込み
-    fs::write(&macro_path, macro_content).map_err(|e| e.to_string())?;
+    fs::write(&macro_path, encoded_content).map_err(|e| e.to_string())?;
+    
 
     // Tera Termマクロ実行コマンド（ttpmacro.exe）
     let status = Command::new(ttpmacro_path)
@@ -106,6 +113,11 @@ fn teraterm_login_su(
         su_username = su_username,
         su_password = su_password,
     );
+    
+    let (encoded_content, _, had_errors) = SHIFT_JIS.encode(&macro_content);
+    if had_errors {
+        return Err("マクロのエンコードに失敗しました。".into());
+    }
 
     // マクロファイルの保存先パス
     let macro_path = env::current_dir()
@@ -113,7 +125,7 @@ fn teraterm_login_su(
         .join("login.ttl");
 
     // マクロファイルを書き込み
-    fs::write(&macro_path, macro_content).map_err(|e| e.to_string())?;
+    fs::write(&macro_path, encoded_content).map_err(|e| e.to_string())?;
 
     // Tera Termマクロ実行コマンド（ttpmacro.exe）
     let status = Command::new(ttpmacro_path)
