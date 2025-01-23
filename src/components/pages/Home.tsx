@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Input, Stack, Text, Table } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Input,
+  Stack,
+  Text,
+  Table,
+  Spinner,
+} from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   CiEraser,
@@ -36,6 +44,7 @@ interface Config {
 const Home: React.FC = () => {
   const { Sid, setSid, selectedServer, setSelectedServer } = useAppContext();
   const [config, setConfig] = React.useState<Config | null>(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,6 +66,7 @@ const Home: React.FC = () => {
 
   // API呼び出し関数
   const fetchServerData = async () => {
+    setLoading(true); // ローディング開始
     try {
       // APIリクエストを送信
       const response = await fetch(`${config?.server_data_api}${Sid}`, {
@@ -77,6 +87,8 @@ const Home: React.FC = () => {
       setSelectedServer(null); // サーバ選択をリセット
     } catch (err) {
       console.error("API呼び出しエラー:", err);
+    } finally {
+      setLoading(false); // ローディング終了
     }
   };
 
@@ -205,10 +217,10 @@ const Home: React.FC = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 100 }} // 初期状態: 右からスライドイン
-      animate={{ opacity: 1, x: 0 }} // アニメーション後: 表示位置
-      exit={{ opacity: 0, x: -100 }} // ページ離脱時: 左へスライドアウト
-      transition={{ duration: 0.5 }} // アニメーション速度
+      initial={{ opacity: 0, x: 100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -100 }}
+      transition={{ duration: 0.5 }}
     >
       <Box p={5}>
         <Stack>
@@ -229,7 +241,13 @@ const Home: React.FC = () => {
             CLEAR
           </Button>
 
-          {filteredServers && (
+          {loading && (
+            <Box mt={5}>
+              <Spinner size="xl" color="teal.500" />
+              <Text mt={2}>データを取得中...</Text>
+            </Box>
+          )}
+          {!loading && filteredServers && (
             <>
               <Text mb={4}>Server List: {selectedServer?.hostname}</Text>
               <Table.Root size="md">
