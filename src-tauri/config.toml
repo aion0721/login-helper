@@ -1,6 +1,6 @@
 ttpmacro_path = 'C:\Program Files (x86)\teraterm\ttpmacro.exe'
-server_data_api = 'http://rp.local:3000/server?sid='
-user_data_api = 'http://rp.local:3000/user?hostname='
+server_data_api = 'http://rp.local:3000/server'
+user_data_api = 'http://rp.local:3000/user'
 default_login_user = 'login00'
 default_login_su = 'root'
 default_login_win = 'tv'

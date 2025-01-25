@@ -48,7 +48,7 @@ const Server: React.FC = () => {
 
       // APIからユーザーデータを取得
       const response = await fetch(
-        `${config.user_data_api}${server.hostname}`,
+        `${config.user_data_api}?hostname=${server.hostname}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },

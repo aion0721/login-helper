@@ -80,7 +80,7 @@ const Home: React.FC = () => {
     setLoading(true); // ローディング開始
     try {
       // APIリクエストを送信
-      const response = await fetch(`${config?.server_data_api}${Sid}`, {
+      const response = await fetch(`${config?.server_data_api}?sid=${Sid}`, {
         method: "GET", // POSTリクエスト
         headers: {
           "Content-Type": "application/json", // JSON形式で送信
@@ -117,7 +117,7 @@ const Home: React.FC = () => {
 
       // APIからユーザーデータを取得
       const response = await fetch(
-        `${config?.user_data_api}${server.hostname}`,
+        `${config?.user_data_api}?hostname=${server.hostname}`,
         {
           method: "GET", // 必要に応じて GET に変更
           headers: {
@@ -151,7 +151,7 @@ const Home: React.FC = () => {
   const handleLogin = async (server: ServerInfo) => {
     try {
       const response = await fetch(
-        `${config?.user_data_api}${server?.hostname}`,
+        `${config?.user_data_api}?hostname=${server?.hostname}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -184,7 +184,7 @@ const Home: React.FC = () => {
   const handleLoginSu = async (server: ServerInfo) => {
     try {
       const response = await fetch(
-        `${config?.user_data_api}${server?.hostname}`,
+        `${config?.user_data_api}?hostname=${server?.hostname}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -226,7 +226,7 @@ const Home: React.FC = () => {
   const handleLoginWin = async (server: ServerInfo) => {
     try {
       const response = await fetch(
-        `${config?.user_data_api}${server?.hostname}`,
+        `${config?.user_data_api}?hostname=${server?.hostname}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
