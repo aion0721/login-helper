@@ -161,7 +161,7 @@ const Home: React.FC = () => {
       const users: UserInfo[] = await response.json();
 
       const defaultUser = users.find(
-        (user) => user.id === config?.default_login_user
+        (user) => user.username === config?.default_login_user
       );
 
       if (!defaultUser) {
@@ -172,7 +172,7 @@ const Home: React.FC = () => {
       await invoke("teraterm_login", {
         ip: server?.ip,
         password: defaultUser.password,
-        username: defaultUser.id,
+        username: defaultUser.username,
       });
     } catch (error) {
       console.error("ログインエラー:", error);
@@ -194,7 +194,7 @@ const Home: React.FC = () => {
       const users: UserInfo[] = await response.json();
 
       const defaultUser = users.find(
-        (user) => user.id === config?.default_login_user
+        (user) => user.username === config?.default_login_user
       );
 
       if (!defaultUser) {
@@ -202,7 +202,9 @@ const Home: React.FC = () => {
         throw new Error("デフォルトユーザが見つかりません");
       }
       // SUユーザーを検索
-      const suUser = users.find((user) => user.id === config?.default_login_su);
+      const suUser = users.find(
+        (user) => user.username === config?.default_login_su
+      );
       if (!suUser) {
         throw new Error("SUユーザが見つかりません");
       }
@@ -210,8 +212,8 @@ const Home: React.FC = () => {
       await invoke("teraterm_login_su", {
         ip: server?.ip,
         password: defaultUser.password,
-        username: defaultUser.id,
-        suUsername: suUser.id, // suユーザ名
+        username: defaultUser.username,
+        suUsername: suUser.username, // suユーザ名
         suPassword: suUser.password, // suユーザのパスワード
       });
     } catch (error) {
@@ -234,7 +236,7 @@ const Home: React.FC = () => {
       const users: UserInfo[] = await response.json();
 
       const defaultUser = users.find(
-        (user) => user.id === config?.default_login_win
+        (user) => user.username === config?.default_login_win
       );
 
       if (!defaultUser) {
@@ -245,7 +247,7 @@ const Home: React.FC = () => {
       await invoke("rdp_login", {
         ip: server?.ip,
         password: defaultUser.password,
-        username: defaultUser.id,
+        username: defaultUser.username,
       });
     } catch (error) {
       console.error("ログインエラー:", error);

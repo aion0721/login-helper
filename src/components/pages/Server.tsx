@@ -61,13 +61,13 @@ const Server: React.FC = () => {
 
       // 条件に応じて selectedUser と selectedSuUser を設定
       const user = userData.find(
-        (user) => user.id === config.default_login_user
+        (user) => user.username === config.default_login_user
       );
       const suUser = userData.find(
-        (user) => user.id === config.default_login_su
+        (user) => user.username === config.default_login_su
       );
       const winUser = userData.find(
-        (user) => user.id === config.default_login_win
+        (user) => user.username === config.default_login_win
       );
 
       setSelectedUser(user || null);
@@ -77,8 +77,8 @@ const Server: React.FC = () => {
 
       // ユーザーデータをリスト形式に変換
       const transformedItems = userData.map((user) => ({
-        label: user.id, // hostnameをlabelに
-        value: user.id, // sidをvalueに
+        label: user.username,
+        value: user.username,
         userInfo: user,
       }));
 
@@ -120,7 +120,7 @@ const Server: React.FC = () => {
       await invoke("teraterm_login", {
         ip: selectedServer?.ip,
         password: user.password,
-        username: user.id,
+        username: user.username,
       });
     } catch (error) {
       console.error("ログインエラー:", error);
@@ -134,8 +134,8 @@ const Server: React.FC = () => {
       await invoke("teraterm_login_su", {
         ip: selectedServer?.ip,
         password: user.password,
-        username: user.id,
-        suUsername: suUser.id, // suユーザ名
+        username: user.username,
+        suUsername: suUser.username, // suユーザ名
         suPassword: suUser.password, // suユーザのパスワード
       });
     } catch (error) {
@@ -150,7 +150,7 @@ const Server: React.FC = () => {
       await invoke("rdp_login", {
         ip: selectedServer?.ip,
         password: user.password,
-        username: user.id,
+        username: user.username,
       });
     } catch (error) {
       console.error("ログインエラー:", error);
@@ -171,7 +171,7 @@ const Server: React.FC = () => {
 
     // 選択されたユーザーを検索して状態を更新
     const selectedUser = fetchUser?.find(
-      (user) => user.id === selectedValue[0]
+      (user) => user.username === selectedValue[0]
     );
     setUserState(selectedUser || null);
   };

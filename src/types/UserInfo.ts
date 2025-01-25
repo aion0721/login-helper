@@ -1,6 +1,7 @@
 export type UserInfo = {
+  id: string;
   sid: string;
   hostname: string;
-  id: string;
+  username: string;
   password: string;
 };

@@ -7,11 +7,7 @@ import {
   SelectValueText,
   createListCollection,
 } from "@chakra-ui/react";
-
-export type UserInfo = {
-  id: string;
-  password: string;
-};
+import type { UserInfo } from "../../types";
 
 type UserDropdownProps = {
   label: string;
@@ -41,7 +37,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
       {selectedUser && (
         <div style={{ fontSize: "14px", color: "#555" }}>
           <span>
-            <strong>ID:</strong> {selectedUser.id}
+            <strong>ID:</strong> {selectedUser.username}
           </span>{" "}
           /{" "}
           <span>
