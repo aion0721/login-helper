@@ -14,6 +14,7 @@ const Server: React.FC = () => {
   // 状態管理
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
   const [selectedSuUser, setSelectedSuUser] = useState<UserInfo | null>(null);
+  const [selectedWinUser, setSelectedWinUser] = useState<UserInfo | null>(null);
 
   const fetchAllData = async (server: ServerInfo) => {
     try {
@@ -40,9 +41,13 @@ const Server: React.FC = () => {
       const suUser = userData.find(
         (user) => user.id === config.default_login_su
       );
+      const winUser = userData.find(
+        (user) => user.id === config.default_login_win
+      );
 
       setSelectedUser(user || null);
       setSelectedSuUser(suUser || null);
+      setSelectedWinUser(winUser || null);
 
       console.log("取得したユーザーデータ:", userData);
     } catch (error) {
@@ -64,7 +69,6 @@ const Server: React.FC = () => {
         password: user.password,
         username: user.id,
       });
-      alert("ログイン成功！");
     } catch (error) {
       console.error("ログインエラー:", error);
       alert("ログイン失敗" + error);
@@ -81,7 +85,20 @@ const Server: React.FC = () => {
         suUsername: suUser.id, // suユーザ名
         suPassword: suUser.password, // suユーザのパスワード
       });
-      alert("ログイン成功！");
+    } catch (error) {
+      console.error("ログインエラー:", error);
+      alert("ログイン失敗" + error);
+    }
+  };
+
+  // ログインボタン押下時の処理
+  const handleWinLogin = async (user: UserInfo) => {
+    try {
+      await invoke("rdp_login", {
+        ip: selectedServer?.ip,
+        password: user.password,
+        username: user.id,
+      });
     } catch (error) {
       console.error("ログインエラー:", error);
       alert("ログイン失敗" + error);
@@ -130,6 +147,12 @@ const Server: React.FC = () => {
                   {selectedSuUser?.id} / {selectedSuUser?.password}
                 </Table.Cell>
               </Table.Row>
+              <Table.Row>
+                <Table.Cell>WinUser</Table.Cell>
+                <Table.Cell>
+                  {selectedWinUser?.id} / {selectedWinUser?.password}
+                </Table.Cell>
+              </Table.Row>
             </Table.Body>
           </Table.Root>
           {/* サーバリスト */}
@@ -158,6 +181,19 @@ const Server: React.FC = () => {
                   Su Login
                 </Button>
               )}
+            </>
+          )}
+
+          {/* ユーザ情報 */}
+          {selectedWinUser && (
+            <>
+              <Button
+                colorPalette="teal"
+                onClick={() => handleWinLogin(selectedWinUser)}
+              >
+                <CiLock />
+                Win Login
+              </Button>
             </>
           )}
         </Stack>
