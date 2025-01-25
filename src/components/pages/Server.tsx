@@ -5,6 +5,8 @@ import { CiLock, CiServer } from "react-icons/ci";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
 import type { Config, ServerInfo, UserInfo } from "../../types";
+import { listen } from "@tauri-apps/api/event";
+import { Toaster, toaster } from "../ui/toaster";
 
 const Server: React.FC = () => {
   const { selectedServer } = useAppContext();
@@ -61,6 +63,22 @@ const Server: React.FC = () => {
     }
   }, [selectedServer]);
 
+  useEffect(() => {
+    // Rustからのイベントをリッスン
+    const unlisten = listen("rust_event", (event) => {
+      const message = event.payload as string;
+      toaster.create({
+        description: message,
+        type: "success", // トーストの種類（success, error, info, warning）
+        duration: 5000, // 表示時間（ミリ秒）
+      });
+    });
+
+    return () => {
+      unlisten.then((fn) => fn());
+    };
+  });
+
   // ログインボタン押下時の処理
   const handleLogin = async (user: UserInfo) => {
     try {
@@ -112,6 +130,7 @@ const Server: React.FC = () => {
       exit={{ opacity: 0, x: -100 }} // ページ離脱時: 左へスライドアウト
       transition={{ duration: 0.5 }} // アニメーション速度
     >
+      <Toaster />
       <Box p={5}>
         <Box>{selectedServer?.hostname}</Box>
         <Stack>

@@ -20,6 +20,8 @@ import { motion } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
 import { useNavigate } from "react-router";
 import type { Config, ServerInfo, UserInfo } from "../../types";
+import { listen } from "@tauri-apps/api/event";
+import { Toaster, toaster } from "../ui/toaster";
 
 const Home: React.FC = () => {
   const { Sid, setSid, setSelectedServer } = useAppContext();
@@ -42,6 +44,23 @@ const Home: React.FC = () => {
     fetchConfig();
     setSid("");
     setSelectedServer(null);
+  }, []);
+
+  useEffect(() => {
+    // Rustからのイベントをリッスン
+    const unlisten = listen("rust_event", (event) => {
+      const message = event.payload as string;
+      toaster.create({
+        description: message,
+        type: "success", // トーストの種類（success, error, info, warning）
+        duration: 5000, // 表示時間（ミリ秒）
+      });
+    });
+
+    // コンポーネントがアンマウントされたときにリスナーを解除
+    return () => {
+      unlisten.then((fn) => fn());
+    };
   }, []);
 
   // サーバ情報とユーザ情報のモックデータ
@@ -205,6 +224,7 @@ const Home: React.FC = () => {
       transition={{ duration: 0.5 }}
     >
       <Box p={5}>
+        <Toaster />
         <Stack>
           {/* SID入力 */}
           <Input

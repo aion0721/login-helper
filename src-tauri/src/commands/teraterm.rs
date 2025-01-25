@@ -3,7 +3,7 @@ use crate::{AppState};
 use encoding_rs::SHIFT_JIS;
 use std::{fs, env};
 use chrono::Local;
-use tauri::AppHandle;
+use tauri::{AppHandle, Emitter};
 use tauri_plugin_shell::ShellExt;
 
 /// Convert password to Tera Term macro-compatible ASCII representation
@@ -73,6 +73,7 @@ pub async fn teraterm_login_su(
     
     // 共通の実行関数を呼び出し
     execute_teraterm_macro(
+        &app_handle,
         &shell, 
         ttpmacro_path,
         &macro_content
@@ -100,6 +101,7 @@ pub async fn teraterm_login(app_handle: AppHandle, ip: String, username: String,
 
     // 共通の実行関数を呼び出し
     execute_teraterm_macro(
+        &app_handle,
         &shell, 
         ttpmacro_path,
         &macro_content
@@ -108,6 +110,7 @@ pub async fn teraterm_login(app_handle: AppHandle, ip: String, username: String,
 }
 
 pub async fn execute_teraterm_macro<R: tauri::Runtime>(
+    app_handle: &AppHandle<R>,
     shell: &tauri_plugin_shell::Shell<R>, 
     ttpmacro_path: &str, 
     macro_content: &str
@@ -147,6 +150,11 @@ pub async fn execute_teraterm_macro<R: tauri::Runtime>(
         if let Err(e) = fs::remove_file(&macro_path) {
             return Err(format!("File deletion failed: {}", e));
         }
+        // イベント送信
+        app_handle
+            .emit("rust_event", "ログイン処理が完了しました。")
+            .map_err(|e| format!("Failed to emit event: {}", e))?;
+
         Ok(())
     } else {
         Err("TeraTerm macro execution failed".into())

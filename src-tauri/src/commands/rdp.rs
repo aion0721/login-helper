@@ -1,4 +1,4 @@
-use tauri::AppHandle;
+use tauri::{AppHandle, Emitter};
 use tauri_plugin_shell::ShellExt;
 
 #[tauri::command]
@@ -59,5 +59,12 @@ pub async fn rdp_login(
         ));
     }
 
+	// イベント送信: 処理完了
+    app_handle
+        .emit("rust_event", "ログイン処理が完了しました。")
+        .map_err(|e| format!("Failed to emit event: {}", e))?;
+
+
     Ok(())
+	
 }
