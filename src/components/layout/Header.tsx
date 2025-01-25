@@ -3,8 +3,20 @@ import { Link as ChakraLink } from "@chakra-ui/react";
 import { CiHome, CiSettings } from "react-icons/ci";
 import { Link as ReactRouterLink } from "react-router-dom";
 import logo from "../../assets/logo.webp";
+import { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 
 const Header: React.FC = () => {
+  const [loginUser, setLoginUser] = useState<string>("");
+  useEffect(() => {
+    invoke<string>("get_user")
+      .then((result) => {
+        setLoginUser(result);
+      })
+      .catch((err) => {
+        console.error("API呼び出しエラー:", err);
+      });
+  }, []);
   return (
     <Flex as="header" bg="teal.500" color="white" p={4} align="center">
       {/* ロゴ部分 */}
@@ -15,6 +27,7 @@ const Header: React.FC = () => {
 
       {/* Spacerで左右の要素を分ける */}
       <Flex flex="1" justify="flex-end" gap={4}>
+        <Text>Welcome, {loginUser}!</Text>
         <ChakraLink asChild>
           <ReactRouterLink to="/">
             <CiHome />

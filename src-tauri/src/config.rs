@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
-use ts_rs::TS;
 use std::{env, fs};
 use tauri::State;
+use ts_rs::TS;
 
 #[derive(Deserialize, Serialize, Clone, TS)]
 #[ts(export)]
@@ -21,14 +21,16 @@ pub fn load_config() -> Config {
         .join("config.toml");
 
     // 設定ファイルの内容を読み込む
-    let config_content = fs::read_to_string(&config_path)
-        .unwrap_or_else(|_| panic!("設定ファイルが見つからないか、読み込めません: {:?}", config_path));
-    
-    // TOML形式の内容をデシリアライズ
-    toml::from_str(&config_content)
-        .expect("設定ファイルのパースに失敗しました")
-}
+    let config_content = fs::read_to_string(&config_path).unwrap_or_else(|_| {
+        panic!(
+            "設定ファイルが見つからないか、読み込めません: {:?}",
+            config_path
+        )
+    });
 
+    // TOML形式の内容をデシリアライズ
+    toml::from_str(&config_content).expect("設定ファイルのパースに失敗しました")
+}
 
 // TauriコマンドとしてConfigを取得
 #[tauri::command]

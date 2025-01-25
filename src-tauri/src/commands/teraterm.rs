@@ -1,8 +1,8 @@
-use tauri::State;
-use crate::{AppState};
-use encoding_rs::SHIFT_JIS;
-use std::{fs, env};
+use crate::AppState;
 use chrono::Local;
+use encoding_rs::SHIFT_JIS;
+use std::{env, fs};
+use tauri::State;
 use tauri::{AppHandle, Emitter};
 use tauri_plugin_shell::ShellExt;
 
@@ -29,7 +29,7 @@ pub async fn teraterm_login_su(
     password: String,
     su_username: String,
     su_password: String,
-    state: State<'_,AppState>,
+    state: State<'_, AppState>,
 ) -> Result<(), String> {
     let shell = app_handle.shell();
     let ttpmacro_path = &state.config.ttpmacro_path;
@@ -70,17 +70,18 @@ pub async fn teraterm_login_su(
         su_username = su_username,
         su_password = ascii_su_password,
     );
-    
+
     // 共通の実行関数を呼び出し
-    execute_teraterm_macro(
-        &app_handle,
-        &shell, 
-        ttpmacro_path,
-        &macro_content
-    ).await
+    execute_teraterm_macro(&app_handle, &shell, ttpmacro_path, &macro_content).await
 }
 #[tauri::command]
-pub async fn teraterm_login(app_handle: AppHandle, ip: String, username: String, password: String, state: State<'_,AppState>) -> Result<(), String> {
+pub async fn teraterm_login(
+    app_handle: AppHandle,
+    ip: String,
+    username: String,
+    password: String,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
     let shell = app_handle.shell();
     let ttpmacro_path = &state.config.ttpmacro_path;
 
@@ -100,20 +101,14 @@ pub async fn teraterm_login(app_handle: AppHandle, ip: String, username: String,
     );
 
     // 共通の実行関数を呼び出し
-    execute_teraterm_macro(
-        &app_handle,
-        &shell, 
-        ttpmacro_path,
-        &macro_content
-    ).await
-
+    execute_teraterm_macro(&app_handle, &shell, ttpmacro_path, &macro_content).await
 }
 
 pub async fn execute_teraterm_macro<R: tauri::Runtime>(
     app_handle: &AppHandle<R>,
-    shell: &tauri_plugin_shell::Shell<R>, 
-    ttpmacro_path: &str, 
-    macro_content: &str
+    shell: &tauri_plugin_shell::Shell<R>,
+    ttpmacro_path: &str,
+    macro_content: &str,
 ) -> Result<(), String> {
     // Shift-JIS エンコーディング
     let (encoded_content, _, had_errors) = SHIFT_JIS.encode(macro_content);
@@ -124,19 +119,18 @@ pub async fn execute_teraterm_macro<R: tauri::Runtime>(
     // 現在の日付と時刻を取得（ミリ秒まで）
     let now = Local::now();
     let timestamp = now.format("%Y-%m-%d_%H-%M-%S.%3f").to_string();
-    
+
     // 動的なファイル名を生成
     let file_name = format!("login_{}.ttl", timestamp);
-    
+
     // マクロファイルの保存先パス
     let macro_path = env::current_dir()
         .map_err(|e| format!("Current directory error: {}", e))?
         .join(file_name);
-    
+
     // マクロファイルを書き込み
-    fs::write(&macro_path, encoded_content)
-        .map_err(|e| format!("File write error: {}", e))?;
-    
+    fs::write(&macro_path, encoded_content).map_err(|e| format!("File write error: {}", e))?;
+
     // Tera Termマクロ実行コマンド（ttpmacro.exe）
     let ttpmacro_status = shell
         .command(ttpmacro_path)
@@ -144,7 +138,7 @@ pub async fn execute_teraterm_macro<R: tauri::Runtime>(
         .output()
         .await
         .map_err(|e| format!("Macro execution error: {}", e))?;
-    
+
     if ttpmacro_status.status.success() {
         // 処理成功時にTTLファイルを削除
         if let Err(e) = fs::remove_file(&macro_path) {
