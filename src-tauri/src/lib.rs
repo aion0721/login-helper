@@ -11,6 +11,7 @@ pub fn run() {
     tauri::Builder::default()
         .manage(AppState { config })
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![commands::teraterm::teraterm_login, commands::teraterm::teraterm_login_su, get_config, commands::rdp::rdp_login])  
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
