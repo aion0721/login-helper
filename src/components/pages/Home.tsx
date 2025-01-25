@@ -29,6 +29,7 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(false);
   // 状態管理
   const [filteredServers, setFilteredServers] = useState<ServerInfo[]>([]);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
 
@@ -61,6 +62,12 @@ const Home: React.FC = () => {
     return () => {
       unlisten.then((fn) => fn());
     };
+  }, []);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   }, []);
 
   // サーバ情報とユーザ情報のモックデータ
@@ -233,6 +240,7 @@ const Home: React.FC = () => {
             //onChange={(e) => handleFilter(e.target.value)}
             onChange={(e) => setSid(e.target.value)}
             onKeyDown={handleKeyDown}
+            ref={inputRef}
           />
           <Button colorPalette="teal" onClick={fetchServerData}>
             <CiSearch />
