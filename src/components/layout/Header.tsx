@@ -2,13 +2,14 @@ import { Flex, Image, Text } from "@chakra-ui/react";
 import { Link as ChakraLink } from "@chakra-ui/react";
 import { CiHome, CiSettings } from "react-icons/ci";
 import { Link as ReactRouterLink } from "react-router-dom";
+import logo from "../../assets/logo.webp";
 
 const Header: React.FC = () => {
   return (
     <Flex as="header" bg="teal.500" color="white" p={4} align="center">
       {/* ロゴ部分 */}
       <Flex align="center" gap={2}>
-        <Image src="/logo.png" alt="Logo" boxSize="40px" />
+        <Image src={logo} alt="Logo" boxSize="40px" />
         <Text fontWeight="bold">Login Helper</Text>
       </Flex>
 
