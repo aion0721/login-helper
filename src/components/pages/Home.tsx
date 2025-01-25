@@ -7,6 +7,8 @@ import {
   Text,
   Table,
   Spinner,
+  defineStyle,
+  Field,
 } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -268,14 +270,22 @@ const Home: React.FC = () => {
         <Toaster />
         <Stack>
           {/* SID入力 */}
-          <Input
-            placeholder="Enter SID"
-            value={Sid}
-            //onChange={(e) => handleFilter(e.target.value)}
-            onChange={(e) => setSid(e.target.value)}
-            onKeyDown={handleKeyDown}
-            ref={inputRef}
-          />
+          <Field.Root>
+            <Box pos="relative" w="full">
+              <Input
+                className="peer"
+                value={Sid}
+                placeholder=""
+                onChange={(e) => setSid(e.target.value)}
+                onKeyDown={handleKeyDown}
+                ref={inputRef}
+              />
+              <Field.Label css={floatingStyles}>SID</Field.Label>
+              <Field.HelperText>
+                SIDは大文字で入力してください。
+              </Field.HelperText>
+            </Box>
+          </Field.Root>
           <Button colorPalette="teal" onClick={fetchServerData}>
             <CiSearch />
             Search SID
@@ -350,5 +360,26 @@ const Home: React.FC = () => {
     </motion.div>
   );
 };
+
+const floatingStyles = defineStyle({
+  pos: "absolute",
+  bg: "bg",
+  px: "0.5",
+  top: "-3",
+  insetStart: "2",
+  fontWeight: "normal",
+  pointerEvents: "none",
+  transition: "position",
+  _peerPlaceholderShown: {
+    color: "fg.muted",
+    top: "2.5",
+    insetStart: "3",
+  },
+  _peerFocusVisible: {
+    color: "fg",
+    top: "-3",
+    insetStart: "2",
+  },
+});
 
 export default Home;
