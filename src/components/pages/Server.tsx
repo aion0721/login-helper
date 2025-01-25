@@ -4,20 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { CiLock, CiServer } from "react-icons/ci";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
-import type { Config } from "../../types/Config";
-
-interface ServerInfo {
-  sid: string;
-  ip: string;
-  hostname: string;
-}
-
-interface UserInfo {
-  sid: string;
-  hostname: string;
-  id: string;
-  password: string;
-}
+import type { Config, ServerInfo, UserInfo } from "../../types";
 
 const Server: React.FC = () => {
   const { selectedServer } = useAppContext();

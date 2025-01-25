@@ -19,20 +19,7 @@ import {
 import { motion } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
 import { useNavigate } from "react-router";
-import type { Config } from "../../types/Config";
-
-interface ServerInfo {
-  sid: string;
-  ip: string;
-  hostname: string;
-}
-
-interface UserInfo {
-  sid: string;
-  hostname: string;
-  id: string;
-  password: string;
-}
+import type { Config, ServerInfo, UserInfo } from "../../types";
 
 const Home: React.FC = () => {
   const { Sid, setSid, setSelectedServer } = useAppContext();

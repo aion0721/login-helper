@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { motion } from "framer-motion";
 import { Heading, Table } from "@chakra-ui/react";
-import type { Config } from "../../types/Config";
+import type { Config } from "../../types";
 
 const Config: React.FC = () => {
   const [config, setConfig] = React.useState<Config | null>(null);
