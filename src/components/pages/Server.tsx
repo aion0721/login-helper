@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { CiLock, CiServer } from "react-icons/ci";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
+import type { Config } from "../../types/Config";
 
 interface ServerInfo {
   sid: string;
@@ -16,14 +17,6 @@ interface UserInfo {
   hostname: string;
   id: string;
   password: string;
-}
-
-interface Config {
-  ttpmacro_path: string;
-  server_data_api: string;
-  user_data_api: string;
-  default_login_user: string;
-  default_login_su: string;
 }
 
 const Server: React.FC = () => {

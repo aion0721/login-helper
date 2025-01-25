@@ -168,7 +168,10 @@ fn teraterm_login_su(
     }
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Clone)]
+use ts_rs::TS;
+
+#[derive(serde::Deserialize, serde::Serialize, Clone, TS)]
+#[ts(export)]
 struct Config {
     ttpmacro_path: String,
     server_data_api: String,

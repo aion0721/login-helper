@@ -19,6 +19,7 @@ import {
 import { motion } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
 import { useNavigate } from "react-router";
+import type { Config } from "../../types/Config";
 
 interface ServerInfo {
   sid: string;
@@ -31,14 +32,6 @@ interface UserInfo {
   hostname: string;
   id: string;
   password: string;
-}
-
-interface Config {
-  ttpmacro_path: string;
-  server_data_api: string;
-  user_data_api: string;
-  default_login_user: string;
-  default_login_su: string;
 }
 
 const Home: React.FC = () => {

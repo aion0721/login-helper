@@ -2,14 +2,7 @@ import React, { useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { motion } from "framer-motion";
 import { Heading, Table } from "@chakra-ui/react";
-
-interface Config {
-  ttpmacro_path: string;
-  server_data_api: string;
-  user_data_api: string;
-  default_login_user: string;
-  default_login_su: string;
-}
+import type { Config } from "../../types/Config";
 
 const Config: React.FC = () => {
   const [config, setConfig] = React.useState<Config | null>(null);
