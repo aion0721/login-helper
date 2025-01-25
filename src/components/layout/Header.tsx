@@ -1,6 +1,6 @@
 import { Flex, Image, Text } from "@chakra-ui/react";
 import { Link as ChakraLink } from "@chakra-ui/react";
-import { CiHome, CiSettings } from "react-icons/ci";
+import { CiDatabase, CiHome, CiSettings } from "react-icons/ci";
 import { Link as ReactRouterLink } from "react-router-dom";
 import logo from "../../assets/logo.webp";
 import { useEffect, useState } from "react";
@@ -32,6 +32,12 @@ const Header: React.FC = () => {
           <ReactRouterLink to="/">
             <CiHome />
             Home
+          </ReactRouterLink>
+        </ChakraLink>
+        <ChakraLink asChild>
+          <ReactRouterLink to="/data">
+            <CiDatabase />
+            Data
           </ReactRouterLink>
         </ChakraLink>
         <ChakraLink asChild>

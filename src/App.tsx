@@ -7,6 +7,7 @@ import { AppProvider } from "./context/AppContext";
 const Home = React.lazy(() => import("./components/pages/Home"));
 const Config = React.lazy(() => import("./components/pages/Config"));
 const Server = React.lazy(() => import("./components/pages/Server"));
+const Data = React.lazy(() => import("./components/pages/Data"));
 
 const App = () => {
   const location = useLocation(); // 現在のルート情報を取得
@@ -22,6 +23,7 @@ const App = () => {
               <Route path="/" element={<Home />} />
               <Route path="/config" element={<Config />} />
               <Route path="/server" element={<Server />} />
+              <Route path="/data" element={<Data />} />
             </Routes>
           </Suspense>
         </AppProvider>
