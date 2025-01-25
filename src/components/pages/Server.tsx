@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Stack, Table } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Stack,
+  Table,
+  createListCollection,
+} from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import { CiLock, CiServer } from "react-icons/ci";
 import { motion } from "framer-motion";
@@ -7,6 +13,8 @@ import { useAppContext } from "../../context/AppContext";
 import type { Config, ServerInfo, UserInfo } from "../../types";
 import { listen } from "@tauri-apps/api/event";
 import { Toaster, toaster } from "../ui/toaster";
+
+import UserDropdown from "../ui/UserDropdown";
 
 const Server: React.FC = () => {
   const { selectedServer } = useAppContext();
@@ -17,6 +25,21 @@ const Server: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
   const [selectedSuUser, setSelectedSuUser] = useState<UserInfo | null>(null);
   const [selectedWinUser, setSelectedWinUser] = useState<UserInfo | null>(null);
+  const [fetchUser, setFetchUser] = useState<UserInfo[] | null>([]);
+  // 型を明示的に指定
+  const [userCollection, setUserCollection] = useState<
+    ReturnType<
+      typeof createListCollection<{
+        label: string;
+        value: string;
+        userInfo: UserInfo;
+      }>
+    >
+  >(
+    createListCollection({
+      items: [],
+    })
+  );
 
   const fetchAllData = async (server: ServerInfo) => {
     try {
@@ -50,6 +73,18 @@ const Server: React.FC = () => {
       setSelectedUser(user || null);
       setSelectedSuUser(suUser || null);
       setSelectedWinUser(winUser || null);
+      setFetchUser(userData);
+
+      // ユーザーデータをリスト形式に変換
+      const transformedItems = userData.map((user) => ({
+        label: user.id, // hostnameをlabelに
+        value: user.id, // sidをvalueに
+        userInfo: user,
+      }));
+
+      // createListCollectionを使用してコレクションを作成
+      const collection = createListCollection({ items: transformedItems });
+      setUserCollection(collection);
 
       console.log("取得したユーザーデータ:", userData);
     } catch (error) {
@@ -122,6 +157,34 @@ const Server: React.FC = () => {
       alert("ログイン失敗" + error);
     }
   };
+  // 汎用的なユーザー変更ハンドラー
+  const handleUserChange = (
+    value: unknown,
+    setUserState: (user: UserInfo | null) => void
+  ) => {
+    // 型アサーションで型をキャスト
+    const { value: selectedValue } = value as {
+      label: string;
+      value: string;
+      userInfo: UserInfo;
+    };
+
+    // 選択されたユーザーを検索して状態を更新
+    const selectedUser = fetchUser?.find(
+      (user) => user.id === selectedValue[0]
+    );
+    setUserState(selectedUser || null);
+  };
+
+  // 各ユーザー変更ハンドラー
+  const handleLoginUserChange = (value: unknown) =>
+    handleUserChange(value, setSelectedUser);
+
+  const handleSuUserChange = (value: unknown) =>
+    handleUserChange(value, setSelectedSuUser);
+
+  const handleWinUserChange = (value: unknown) =>
+    handleUserChange(value, setSelectedWinUser);
 
   return (
     <motion.div
@@ -157,24 +220,38 @@ const Server: React.FC = () => {
               <Table.Row>
                 <Table.Cell>LoginUsers</Table.Cell>
                 <Table.Cell>
-                  {selectedUser?.id} / {selectedUser?.password}
+                  <UserDropdown
+                    label="Select User"
+                    userCollection={userCollection}
+                    selectedUser={selectedUser}
+                    onChange={handleLoginUserChange}
+                  />
                 </Table.Cell>
               </Table.Row>
               <Table.Row>
                 <Table.Cell>SuUsers</Table.Cell>
                 <Table.Cell>
-                  {selectedSuUser?.id} / {selectedSuUser?.password}
+                  <UserDropdown
+                    label="Select Su User"
+                    userCollection={userCollection}
+                    selectedUser={selectedSuUser}
+                    onChange={handleSuUserChange}
+                  />
                 </Table.Cell>
               </Table.Row>
               <Table.Row>
                 <Table.Cell>WinUser</Table.Cell>
                 <Table.Cell>
-                  {selectedWinUser?.id} / {selectedWinUser?.password}
+                  <UserDropdown
+                    label="Select Win User"
+                    userCollection={userCollection}
+                    selectedUser={selectedWinUser}
+                    onChange={handleWinUserChange}
+                  />
                 </Table.Cell>
               </Table.Row>
             </Table.Body>
           </Table.Root>
-          {/* サーバリスト */}
 
           {/* ログインボタン */}
           {selectedUser && (
