@@ -1,6 +1,5 @@
 use tauri::AppHandle;
 use tauri_plugin_shell::ShellExt;
-use std::io;
 
 #[tauri::command]
 pub async fn rdp_login(

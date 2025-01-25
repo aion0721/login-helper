@@ -3,34 +3,40 @@ use crate::{AppState};
 use encoding_rs::SHIFT_JIS;
 use std::{fs, env};
 use chrono::Local;
-use std::process::Command;
+use tauri::AppHandle;
+use tauri_plugin_shell::ShellExt;
+
+/// Convert password to Tera Term macro-compatible ASCII representation
+fn convert_password_to_macro_format(password: &str) -> String {
+    password
+        .chars()
+        .map(|c| {
+            // UTF-8でエンコードし、各バイトを#形式に変換
+            format!("{}", c)
+                .as_bytes()
+                .iter()
+                .map(|&b| format!("#{}", b))
+                .collect::<String>()
+        })
+        .collect()
+}
 
 #[tauri::command]
-pub fn teraterm_login_su(
+pub async fn teraterm_login_su(
+    app_handle: AppHandle,
     ip: String,
     username: String,
     password: String,
     su_username: String,
     su_password: String,
-    state: State<AppState>,
+    state: State<'_,AppState>,
 ) -> Result<(), String> {
+    let shell = app_handle.shell();
     let ttpmacro_path = &state.config.ttpmacro_path;
 
     // パスワードを「#ASCIIコード」形式に変換
-    let ascii_password: String = password
-        .as_bytes()
-        .iter()
-        .map(|&b| format!("#{}", b)) // 各バイトを「#ASCIIコード」に変換
-        .collect::<Vec<String>>()
-        .join(""); // 結合して1つの文字列に
-
-    // パスワードを「#ASCIIコード」形式に変換
-    let ascii_su_password: String = su_password
-        .as_bytes()
-        .iter()
-        .map(|&b| format!("#{}", b)) // 各バイトを「#ASCIIコード」に変換
-        .collect::<Vec<String>>()
-        .join(""); // 結合して1つの文字列に
+    let ascii_password = convert_password_to_macro_format(&password);
+    let ascii_su_password = convert_password_to_macro_format(&su_password);
 
     // Tera Termマクロの内容を生成
     let macro_content = format!(
@@ -65,56 +71,20 @@ pub fn teraterm_login_su(
         su_password = ascii_su_password,
     );
     
-    let (encoded_content, _, had_errors) = SHIFT_JIS.encode(&macro_content);
-    if had_errors {
-        return Err("マクロのエンコードに失敗しました。".into());
-    }
-
-    // 現在の日付と時刻を取得（ミリ秒まで）
-    let now = Local::now();
-    let timestamp = now.format("%Y-%m-%d_%H-%M-%S.%3f").to_string();
-
-    // 動的なファイル名を生成
-    let file_name = format!("login_{}.ttl", timestamp);
-
-
-    // マクロファイルの保存先パス
-    let macro_path = env::current_dir()
-    .expect("現在の作業ディレクトリが取得できません")
-    .join(file_name);
-
-
-    // マクロファイルを書き込み
-    fs::write(&macro_path, encoded_content).map_err(|e| e.to_string())?;
-
-    // Tera Termマクロ実行コマンド（ttpmacro.exe）
-    let status = Command::new(ttpmacro_path)
-        .arg(macro_path.to_str().unwrap())
-        .status()
-        .map_err(|e| e.to_string())?;
-
-    if status.success() {
-        // 処理成功時にTTLファイルを削除
-        if let Err(e) = fs::remove_file(&macro_path) {
-            eprintln!("ファイル削除に失敗しました: {}", e);
-            return Err("処理は成功しましたが、ファイル削除に失敗しました。".into());
-        }
-        Ok(())
-    } else {
-        Err("Tera Termマクロの実行に失敗しました。".into())
-    }
+    // 共通の実行関数を呼び出し
+    execute_teraterm_macro(
+        &shell, 
+        ttpmacro_path,
+        &macro_content
+    ).await
 }
 #[tauri::command]
-pub fn teraterm_login(ip: String, username: String, password: String, state: State<AppState>) -> Result<(), String> {
+pub async fn teraterm_login(app_handle: AppHandle, ip: String, username: String, password: String, state: State<'_,AppState>) -> Result<(), String> {
+    let shell = app_handle.shell();
     let ttpmacro_path = &state.config.ttpmacro_path;
 
     // パスワードを「#ASCIIコード」形式に変換
-    let ascii_password: String = password
-        .as_bytes()
-        .iter()
-        .map(|&b| format!("#{}", b)) // 各バイトを「#ASCIIコード」に変換
-        .collect::<Vec<String>>()
-        .join(""); // 結合して1つの文字列に
+    let ascii_password = convert_password_to_macro_format(&password);
 
     // Tera Termマクロの内容を生成
     let macro_content = format!(
@@ -128,7 +98,22 @@ pub fn teraterm_login(ip: String, username: String, password: String, state: Sta
         password = ascii_password,
     );
 
-    let (encoded_content, _, had_errors) = SHIFT_JIS.encode(&macro_content);
+    // 共通の実行関数を呼び出し
+    execute_teraterm_macro(
+        &shell, 
+        ttpmacro_path,
+        &macro_content
+    ).await
+
+}
+
+pub async fn execute_teraterm_macro<R: tauri::Runtime>(
+    shell: &tauri_plugin_shell::Shell<R>, 
+    ttpmacro_path: &str, 
+    macro_content: &str
+) -> Result<(), String> {
+    // Shift-JIS エンコーディング
+    let (encoded_content, _, had_errors) = SHIFT_JIS.encode(macro_content);
     if had_errors {
         return Err("マクロのエンコードに失敗しました。".into());
     }
@@ -136,34 +121,34 @@ pub fn teraterm_login(ip: String, username: String, password: String, state: Sta
     // 現在の日付と時刻を取得（ミリ秒まで）
     let now = Local::now();
     let timestamp = now.format("%Y-%m-%d_%H-%M-%S.%3f").to_string();
-
+    
     // 動的なファイル名を生成
     let file_name = format!("login_{}.ttl", timestamp);
-
-
+    
     // マクロファイルの保存先パス
     let macro_path = env::current_dir()
-    .expect("現在の作業ディレクトリが取得できません")
-    .join(file_name);
-
-    // マクロファイルを書き込み
-    fs::write(&macro_path, encoded_content).map_err(|e| e.to_string())?;
+        .map_err(|e| format!("Current directory error: {}", e))?
+        .join(file_name);
     
-
+    // マクロファイルを書き込み
+    fs::write(&macro_path, encoded_content)
+        .map_err(|e| format!("File write error: {}", e))?;
+    
     // Tera Termマクロ実行コマンド（ttpmacro.exe）
-    let status = Command::new(ttpmacro_path)
+    let ttpmacro_status = shell
+        .command(ttpmacro_path)
         .arg(macro_path.to_str().unwrap())
-        .status()
-        .map_err(|e| e.to_string())?;
-
-    if status.success() {
+        .output()
+        .await
+        .map_err(|e| format!("Macro execution error: {}", e))?;
+    
+    if ttpmacro_status.status.success() {
         // 処理成功時にTTLファイルを削除
         if let Err(e) = fs::remove_file(&macro_path) {
-            eprintln!("ファイル削除に失敗しました: {}", e);
-            return Err("処理は成功しましたが、ファイル削除に失敗しました。".into());
+            return Err(format!("File deletion failed: {}", e));
         }
         Ok(())
     } else {
-        Err("Tera Termマクロの実行に失敗しました。".into())
+        Err("TeraTerm macro execution failed".into())
     }
 }
