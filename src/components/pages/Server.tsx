@@ -7,7 +7,7 @@ import {
   createListCollection,
 } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
-import { CiLock, CiServer } from "react-icons/ci";
+import { CiDesktop, CiLock, CiServer } from "react-icons/ci";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
 import type { Config, ServerInfo, UserInfo } from "../../types";
@@ -287,7 +287,7 @@ const Server: React.FC = () => {
                 colorPalette="teal"
                 onClick={() => handleWinLogin(selectedWinUser)}
               >
-                <CiLock />
+                <CiDesktop />
                 Win Login
               </Button>
             </>

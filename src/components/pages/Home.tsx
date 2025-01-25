@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import {
+  CiDesktop,
   CiEraser,
   CiLock,
   CiSearch,
@@ -217,6 +218,39 @@ const Home: React.FC = () => {
     }
   };
 
+  // ログインボタン押下時の処理
+  const handleLoginWin = async (server: ServerInfo) => {
+    try {
+      const response = await fetch(
+        `${config?.user_data_api}${server?.hostname}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      const users: UserInfo[] = await response.json();
+
+      const defaultUser = users.find(
+        (user) => user.id === config?.default_login_win
+      );
+
+      if (!defaultUser) {
+        console.log(response);
+        throw new Error("デフォルトユーザが見つかりません");
+      }
+
+      await invoke("rdp_login", {
+        ip: server?.ip,
+        password: defaultUser.password,
+        username: defaultUser.id,
+      });
+    } catch (error) {
+      console.error("ログインエラー:", error);
+      alert("ログイン失敗" + error);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       fetchServerData();
@@ -287,6 +321,13 @@ const Home: React.FC = () => {
                             >
                               <CiLock />
                               SuLogin
+                            </Button>
+                            <Button
+                              colorPalette="red"
+                              onClick={() => handleLoginWin(server)}
+                            >
+                              <CiDesktop />
+                              WinLogin
                             </Button>
                             <Button
                               colorPalette="yellow"
