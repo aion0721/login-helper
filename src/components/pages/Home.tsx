@@ -25,6 +25,7 @@ import { useNavigate } from "react-router";
 import type { Config, ServerInfo, UserInfo } from "../../types";
 import { listen } from "@tauri-apps/api/event";
 import { Toaster, toaster } from "../ui/toaster";
+import { Tooltip } from "../ui/tooltip";
 
 const Home: React.FC = () => {
   const { Sid, setSid, setSelectedServer } = useAppContext();
@@ -349,34 +350,54 @@ const Home: React.FC = () => {
                         <Table.Cell>{server.ip}</Table.Cell>
                         <Table.Cell>
                           <Stack direction="row" justify="center">
-                            <Button
-                              colorPalette="cyan"
-                              onClick={() => handleLogin(server)}
+                            <Tooltip
+                              showArrow
+                              content={`User:${config?.default_login_user}`}
                             >
-                              <CiServer />
-                              Login
-                            </Button>
-                            <Button
-                              colorPalette="teal"
-                              onClick={() => handleLoginSu(server)}
+                              <Button
+                                colorPalette="cyan"
+                                onClick={() => handleLogin(server)}
+                              >
+                                <CiServer />
+                                Login
+                              </Button>
+                            </Tooltip>
+                            <Tooltip
+                              showArrow
+                              content={`SuUser:${config?.default_login_su}`}
                             >
-                              <CiLock />
-                              SuLogin
-                            </Button>
-                            <Button
-                              colorPalette="red"
-                              onClick={() => handleLoginWin(server)}
+                              <Button
+                                colorPalette="teal"
+                                onClick={() => handleLoginSu(server)}
+                              >
+                                <CiLock />
+                                SuLogin
+                              </Button>
+                            </Tooltip>
+                            <Tooltip
+                              showArrow
+                              content={`WinUser:${config?.default_login_win}`}
                             >
-                              <CiDesktop />
-                              WinLogin
-                            </Button>
-                            <Button
-                              colorPalette="yellow"
-                              onClick={() => handleServerSelect(server)}
+                              <Button
+                                colorPalette="red"
+                                onClick={() => handleLoginWin(server)}
+                              >
+                                <CiDesktop />
+                                WinLogin
+                              </Button>
+                            </Tooltip>
+                            <Tooltip
+                              showArrow
+                              content="SwitchUser/ShowPassword"
                             >
-                              <CiViewList />
-                              Detail
-                            </Button>
+                              <Button
+                                colorPalette="yellow"
+                                onClick={() => handleServerSelect(server)}
+                              >
+                                <CiViewList />
+                                Detail
+                              </Button>
+                            </Tooltip>
                           </Stack>
                         </Table.Cell>
                       </Table.Row>
