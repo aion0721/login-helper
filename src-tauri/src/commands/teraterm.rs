@@ -7,12 +7,20 @@ use tauri::{AppHandle, Emitter};
 use tauri_plugin_shell::ShellExt;
 
 /// Convert password to Tera Term macro-compatible ASCII representation
-fn convert_password_to_macro_format(password: &str) -> String {
+/// If `login_flag` is true, double quotes in the password are doubled.
+fn convert_password_to_macro_format(password: &str, login_flag: bool) -> String {
     password
         .chars()
         .map(|c| {
-            // UTF-8でエンコードし、各バイトを#形式に変換
-            format!("{}", c)
+            let mut encoded = c.to_string();
+            
+            // If login_flag is true and the character is a double quote, double it
+            if login_flag && c == '"' {
+                encoded.push('"');
+            }
+            
+            // Encode each byte of the character in #<ASCII code> format
+            encoded
                 .as_bytes()
                 .iter()
                 .map(|&b| format!("#{}", b))
@@ -20,6 +28,7 @@ fn convert_password_to_macro_format(password: &str) -> String {
         })
         .collect()
 }
+
 
 #[tauri::command]
 pub async fn teraterm_login_su(
@@ -35,8 +44,8 @@ pub async fn teraterm_login_su(
     let ttpmacro_path = &state.config.ttpmacro_path;
 
     // パスワードを「#ASCIIコード」形式に変換
-    let ascii_password = convert_password_to_macro_format(&password);
-    let ascii_su_password = convert_password_to_macro_format(&su_password);
+    let ascii_password = convert_password_to_macro_format(&password, true);
+    let ascii_su_password = convert_password_to_macro_format(&su_password, false);
 
     // Tera Termマクロの内容を生成
     let macro_content = format!(
@@ -86,7 +95,7 @@ pub async fn teraterm_login(
     let ttpmacro_path = &state.config.ttpmacro_path;
 
     // パスワードを「#ASCIIコード」形式に変換
-    let ascii_password = convert_password_to_macro_format(&password);
+    let ascii_password = convert_password_to_macro_format(&password, true);
 
     // Tera Termマクロの内容を生成
     let macro_content = format!(
