@@ -4,6 +4,7 @@ import { Field } from "../ui/field";
 import { motion } from "framer-motion";
 import type { UserInfo, Config } from "../../types";
 import { invoke } from "@tauri-apps/api/core";
+import { toaster, Toaster } from "../ui/toaster";
 
 const Data = () => {
   const [targetUser, setTargetUser] = React.useState<UserInfo>({} as UserInfo);
@@ -39,6 +40,37 @@ const Data = () => {
     }
   };
 
+  const pushUserData = async () => {
+    try {
+      const config = await invoke<Config>("get_config");
+      // fetchDataのidがある場合＝既存のユーザがある。そのため、更新処理となる。
+      // fetchDataのidがない場合＝既存のユーザがない。そのため、追加処理となる。
+      const ApiEndpoint = fetchData?.id
+        ? `${config.user_data_api}?id=${fetchData.id}`
+        : `${config.user_data_api}`;
+
+      const response = await fetch(ApiEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fetchData), // 送信するデータをセット
+      });
+
+      if (response.ok) {
+        toaster.create({
+          description: "データが追加・更新されました。",
+          type: "success", // トーストの種類（success, error, info, warning）
+          duration: 5000, // 表示時間（ミリ秒）
+        });
+      }
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      toaster.create({
+        type: "error",
+        description: errorMessage,
+      });
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 100 }}
@@ -46,6 +78,7 @@ const Data = () => {
       exit={{ opacity: 0, x: -100 }}
       transition={{ duration: 0.5 }}
     >
+      <Toaster />
       <Heading>Data</Heading>
       <Box maxW="md" mx="auto" mt={10}>
         <VStack>
@@ -107,23 +140,26 @@ const Data = () => {
               <Field label="password">
                 <Input
                   id="password"
-                  value={fetchData?.password || ""} // targetUser の sid プロパティをバインド
+                  value={fetchData?.password || ""} // fetchData.password が未定義の場合は空文字列
                   onChange={(e) =>
-                    setTargetUser((prev) => ({
-                      ...prev, // 既存のプロパティを維持
-                      password: e.target.value, // sid を更新
+                    setFetchData((prev) => ({
+                      ...targetUser,
+                      ...prev, // prev は常にオブジェクトとして扱える
+                      password: e.target.value,
                     }))
                   }
                 />
               </Field>
+
               {/* Submit ボタン */}
 
               <Button
                 w={"100%"}
                 colorPalette="teal"
                 onClick={() => {
-                  getUserData();
+                  pushUserData();
                 }}
+                disabled={!fetchData.password}
               >
                 {!fetchData.id ? "Create" : "Update"} User Data
               </Button>
