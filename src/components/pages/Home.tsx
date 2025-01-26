@@ -9,6 +9,7 @@ import {
   Spinner,
   defineStyle,
   Field,
+  Flex,
 } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -33,8 +34,19 @@ const Home: React.FC = () => {
   // 状態管理
   const [filteredServers, setFilteredServers] = useState<ServerInfo[]>([]);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const filterInputRef = React.useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
+
+  const [filterValue, setFilterValue] = useState<string>("");
+
+  // Modify the filtering logic
+  const displayedServers = filteredServers.filter((server) => {
+    if (!filterValue) return true;
+
+    const columnValue = server["hostname"]?.toString().toLowerCase() || "";
+    return columnValue.includes(filterValue.toLowerCase());
+  });
 
   useEffect(() => {
     async function fetchConfig() {
@@ -100,6 +112,9 @@ const Home: React.FC = () => {
       console.error("API呼び出しエラー:", err);
     } finally {
       setLoading(false); // ローディング終了
+    }
+    if (filterInputRef.current) {
+      filterInputRef.current.focus();
     }
   };
 
@@ -297,13 +312,28 @@ const Home: React.FC = () => {
             CLEAR
           </Button>
 
+          <Field.Root marginTop={4}>
+            <Box pos="relative" w="full">
+              <Input
+                className="peer"
+                value={filterValue}
+                placeholder=""
+                ref={filterInputRef}
+                onChange={(e) => setFilterValue(e.target.value)}
+              />
+              <Field.Label css={floatingStyles}>HostnameFilter</Field.Label>
+              <Field.HelperText>
+                フィルタリングするホスト名を入力してください。
+              </Field.HelperText>
+            </Box>
+          </Field.Root>
           {loading ? (
             <Box mt={5}>
               <Spinner size="xl" color="teal.500" />
               <Text mt={2}>データを取得中...</Text>
             </Box>
           ) : (
-            filteredServers.length > 0 && (
+            displayedServers.length > 0 && (
               <>
                 <Table.Root size="md">
                   <Table.Header>
@@ -314,7 +344,7 @@ const Home: React.FC = () => {
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
-                    {filteredServers.map((server) => (
+                    {displayedServers.map((server) => (
                       <Table.Row key={server.ip}>
                         <Table.Cell>{server.hostname}</Table.Cell>
                         <Table.Cell>{server.ip}</Table.Cell>
