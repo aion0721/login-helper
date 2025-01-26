@@ -17,7 +17,7 @@ import {
   CiLock,
   CiSearch,
   CiServer,
-  CiViewList,
+  CiUser,
 } from "react-icons/ci";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../context/AppContext";
@@ -394,8 +394,8 @@ const Home: React.FC = () => {
                                 colorPalette="yellow"
                                 onClick={() => handleServerSelect(server)}
                               >
-                                <CiViewList />
-                                Detail
+                                <CiUser />
+                                SelectUser
                               </Button>
                             </Tooltip>
                           </Stack>
