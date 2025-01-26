@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Heading, Input, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Heading, Input, VStack } from "@chakra-ui/react";
 import { Field } from "../ui/field";
 import { motion } from "framer-motion";
 import type { UserInfo, Config } from "../../types";
