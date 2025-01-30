@@ -9,6 +9,8 @@ import {
   Spinner,
   defineStyle,
   Field,
+  Flex,
+  Group,
 } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -26,11 +28,13 @@ import type { Config, ServerInfo, UserInfo } from "../../types";
 import { listen } from "@tauri-apps/api/event";
 import { Toaster, toaster } from "../ui/toaster";
 import { Tooltip } from "../ui/tooltip";
+import { Checkbox } from "../ui/checkbox";
 
 const Home: React.FC = () => {
   const { Sid, setSid, setSelectedServer } = useAppContext();
   const [config, setConfig] = React.useState<Config | null>(null);
   const [loading, setLoading] = useState(false);
+  const [ocChecked, setOcChecked] = useState(false);
   // 状態管理
   const [filteredServers, setFilteredServers] = useState<ServerInfo[]>([]);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -39,6 +43,10 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
 
   const [filterValue, setFilterValue] = useState<string>("");
+
+  const ocUser = config?.default_login_oc
+    ? config.default_login_oc.replace(/\[sid\]/g, Sid.toLowerCase())
+    : null;
 
   // Modify the filtering logic
   const displayedServers = filteredServers.filter((server) => {
@@ -214,6 +222,10 @@ const Home: React.FC = () => {
         throw new Error("SUユーザが見つかりません");
       }
 
+      if (ocChecked) {
+        console.log(ocUser);
+      }
+
       // invoke の呼び出し
       if (loginType === "win") {
         await invoke("rdp_login", {
@@ -257,32 +269,42 @@ const Home: React.FC = () => {
       <Box p={5}>
         <Toaster />
         <Stack>
-          {/* SID入力 */}
-          <Field.Root>
-            <Box pos="relative" w="full">
-              <Input
-                className="peer"
-                value={Sid}
-                placeholder=""
-                onChange={(e) => setSid(e.target.value)}
-                onKeyDown={handleKeyDown}
-                ref={inputRef}
-              />
-              <Field.Label css={floatingStyles}>SID</Field.Label>
-              <Field.HelperText>
-                SIDは大文字で入力してください。
-              </Field.HelperText>
-            </Box>
-          </Field.Root>
-          <Button colorPalette="teal" onClick={fetchServerData}>
-            <CiSearch />
-            Search SID
-          </Button>
-          <Button onClick={handleClear}>
-            <CiEraser />
-            CLEAR
-          </Button>
+          <Flex gap="4">
+            <Field.Root>
+              <Box pos="relative" w="full">
+                <Input
+                  className="peer"
+                  value={Sid}
+                  placeholder=""
+                  onChange={(e) => setSid(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  ref={inputRef}
+                />
+                <Field.Label css={floatingStyles}>SID</Field.Label>
+                <Field.HelperText>
+                  SIDは大文字で入力してください。
+                </Field.HelperText>
+              </Box>
+            </Field.Root>
+            <Button colorPalette="teal" onClick={fetchServerData}>
+              <CiSearch />
+              Search SID
+            </Button>
+            <Button onClick={handleClear}>
+              <CiEraser />
+              CLEAR
+            </Button>
+          </Flex>
 
+          <Group direction="row">
+            <Text>Options</Text>
+            <Checkbox
+              checked={ocChecked}
+              onCheckedChange={(e) => setOcChecked(!!e.checked)}
+            >
+              OC Login
+            </Checkbox>
+          </Group>
           <Field.Root marginTop={4}>
             <Box pos="relative" w="full">
               <Input
