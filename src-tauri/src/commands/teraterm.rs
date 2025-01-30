@@ -13,12 +13,12 @@ fn convert_password_to_macro_format(password: &str, login_flag: bool) -> String 
         .chars()
         .map(|c| {
             let mut encoded = c.to_string();
-            
+
             // If login_flag is true and the character is a double quote, double it
             if login_flag && c == '"' {
                 encoded.push('"');
             }
-            
+
             // Encode each byte of the character in #<ASCII code> format
             encoded
                 .as_bytes()
@@ -28,7 +28,6 @@ fn convert_password_to_macro_format(password: &str, login_flag: bool) -> String 
         })
         .collect()
 }
-
 
 #[tauri::command]
 pub async fn teraterm(
