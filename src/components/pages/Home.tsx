@@ -188,7 +188,6 @@ const Home: React.FC = () => {
         ip: server?.ip,
         password: defaultUser.password,
         username: defaultUser.username,
-        isSu: false,
       });
     } catch (error) {
       console.error("ログインエラー:", error);

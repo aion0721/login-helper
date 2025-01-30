@@ -38,22 +38,22 @@ pub async fn teraterm(
     password: String,
     su_username: Option<String>, // su_usernameはオプション型に
     su_password: Option<String>, // su_passwordもオプション型に
-    is_su: bool,          // suコマンドを実行するかどうかのフラグ
+    is_su: Option<bool>,         // suコマンドを実行するかどうかのフラグ（オプション型）
     state: State<'_, AppState>,
 ) -> Result<(), String> {
     let shell = app_handle.shell();
     let ttpmacro_path = &state.config.ttpmacro_path;
 
+    // is_suが未定義の場合はデフォルトでfalse
+    let is_su = is_su.unwrap_or(false);
+
     // パスワードを「#ASCIIコード」形式に変換
     let ascii_password = convert_password_to_macro_format(&password, true);
-    let ascii_su_password = if is_su {
-        su_password
-            .as_ref()
-            .map(|p| convert_password_to_macro_format(p, false))
-            .unwrap_or_else(|| "".to_string())
-    } else {
-        "".to_string()
-    };
+    let ascii_su_password = su_password
+        .as_ref()
+        .filter(|_| is_su) // is_suがtrueの場合のみ処理を継続
+        .map(|p| convert_password_to_macro_format(p, false))
+        .unwrap_or_default(); // デフォルト値として空文字列
 
     // ベースとなるTera Termマクロの内容
     let mut macro_content = format!(

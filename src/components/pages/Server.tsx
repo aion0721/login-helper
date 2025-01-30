@@ -121,7 +121,6 @@ const Server: React.FC = () => {
         ip: selectedServer?.ip,
         password: user.password,
         username: user.username,
-        isSu: false,
       });
     } catch (error) {
       console.error("ログインエラー:", error);
