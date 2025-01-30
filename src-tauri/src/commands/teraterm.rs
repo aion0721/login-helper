@@ -31,13 +31,14 @@ fn convert_password_to_macro_format(password: &str, login_flag: bool) -> String 
 
 
 #[tauri::command]
-pub async fn teraterm_login_su(
+pub async fn teraterm(
     app_handle: AppHandle,
     ip: String,
     username: String,
     password: String,
-    su_username: String,
-    su_password: String,
+    su_username: Option<String>, // su_usernameはオプション型に
+    su_password: Option<String>, // su_passwordもオプション型に
+    is_su: bool,          // suコマンドを実行するかどうかのフラグ
     state: State<'_, AppState>,
 ) -> Result<(), String> {
     let shell = app_handle.shell();
@@ -45,69 +46,50 @@ pub async fn teraterm_login_su(
 
     // パスワードを「#ASCIIコード」形式に変換
     let ascii_password = convert_password_to_macro_format(&password, true);
-    let ascii_su_password = convert_password_to_macro_format(&su_password, false);
+    let ascii_su_password = if is_su {
+        su_password
+            .as_ref()
+            .map(|p| convert_password_to_macro_format(p, false))
+            .unwrap_or_else(|| "".to_string())
+    } else {
+        "".to_string()
+    };
 
-    // Tera Termマクロの内容を生成
-    let macro_content = format!(
+    // ベースとなるTera Termマクロの内容
+    let mut macro_content = format!(
         r#"
         ; 接続実行
         connect '{ip}:22 /ssh /2 /auth=password /user={username} /passwd="'{password}'"'
-
-        ; 接続確認
-        if result != 2 then
-            messagebox '接続に失敗しました。'
-            end
-        endif
-
-        ; suコマンドの実行
-        wait '$'
-        sendln 'su - {su_username}'
-        wait 'パスワード'
-        sendln {su_password}
-
-        ; suコマンド成功確認（プロンプトが変わることを想定）
-        wait '#'
-
-        ; 必要な後続処理をここに記述可能
-        sendln 'whoami'
-        
-        end
-        "#,
-        ip = ip,
-        username = username,
-        password = ascii_password,
-        su_username = su_username,
-        su_password = ascii_su_password,
-    );
-
-    // 共通の実行関数を呼び出し
-    execute_teraterm_macro(&app_handle, &shell, ttpmacro_path, &macro_content).await
-}
-#[tauri::command]
-pub async fn teraterm_login(
-    app_handle: AppHandle,
-    ip: String,
-    username: String,
-    password: String,
-    state: State<'_, AppState>,
-) -> Result<(), String> {
-    let shell = app_handle.shell();
-    let ttpmacro_path = &state.config.ttpmacro_path;
-
-    // パスワードを「#ASCIIコード」形式に変換
-    let ascii_password = convert_password_to_macro_format(&password, true);
-
-    // Tera Termマクロの内容を生成
-    let macro_content = format!(
-        r#"
-        ; 接続実行
-        connect '{ip}:22 /ssh /2 /auth=password /user={username} /passwd="'{password}'"'
-        end
         "#,
         ip = ip,
         username = username,
         password = ascii_password,
     );
+
+    // is_suがtrueの場合、suコマンド処理を追記
+    if is_su {
+        let su_commands = format!(
+            r#"
+            ; suコマンドの実行
+            wait '$'
+            sendln 'su - {su_username}'
+            wait 'パスワード'
+            sendln {su_password}
+
+            ; suコマンド成功確認（プロンプトが変わることを想定）
+            wait '#'
+
+            ; 必要な後続処理をここに記述可能
+            sendln 'whoami'
+            "#,
+            su_username = su_username.unwrap_or_else(|| "".to_string()),
+            su_password = ascii_su_password,
+        );
+        macro_content.push_str(&su_commands);
+    }
+
+    // 最後にendを追加
+    macro_content.push_str("\nend\n");
 
     // 共通の実行関数を呼び出し
     execute_teraterm_macro(&app_handle, &shell, ttpmacro_path, &macro_content).await

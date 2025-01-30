@@ -184,10 +184,11 @@ const Home: React.FC = () => {
         throw new Error("デフォルトユーザが見つかりません");
       }
 
-      await invoke("teraterm_login", {
+      await invoke("teraterm", {
         ip: server?.ip,
         password: defaultUser.password,
         username: defaultUser.username,
+        isSu: false,
       });
     } catch (error) {
       console.error("ログインエラー:", error);
@@ -224,12 +225,13 @@ const Home: React.FC = () => {
         throw new Error("SUユーザが見つかりません");
       }
 
-      await invoke("teraterm_login_su", {
+      await invoke("teraterm", {
         ip: server?.ip,
         password: defaultUser.password,
         username: defaultUser.username,
         suUsername: suUser.username, // suユーザ名
         suPassword: suUser.password, // suユーザのパスワード
+        isSu: true,
       });
     } catch (error) {
       console.error("ログインエラー:", error);

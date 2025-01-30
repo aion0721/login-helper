@@ -21,10 +21,9 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
-            commands::teraterm::teraterm_login,
-            commands::teraterm::teraterm_login_su,
-            get_config,
+            commands::teraterm::teraterm,
             commands::rdp::rdp_login,
+            get_config,
             get_user
         ])
         .run(tauri::generate_context!())

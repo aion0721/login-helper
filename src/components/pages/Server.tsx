@@ -117,10 +117,11 @@ const Server: React.FC = () => {
   // ログインボタン押下時の処理
   const handleLogin = async (user: UserInfo) => {
     try {
-      await invoke("teraterm_login", {
+      await invoke("teraterm", {
         ip: selectedServer?.ip,
         password: user.password,
         username: user.username,
+        isSu: false,
       });
     } catch (error) {
       console.error("ログインエラー:", error);
@@ -131,12 +132,13 @@ const Server: React.FC = () => {
   // ログインボタン押下時の処理
   const handleLoginSu = async (user: UserInfo, suUser: UserInfo) => {
     try {
-      await invoke("teraterm_login_su", {
+      await invoke("teraterm", {
         ip: selectedServer?.ip,
         password: user.password,
         username: user.username,
         suUsername: suUser.username, // suユーザ名
         suPassword: suUser.password, // suユーザのパスワード
+        isSu: true,
       });
     } catch (error) {
       console.error("ログインエラー:", error);
