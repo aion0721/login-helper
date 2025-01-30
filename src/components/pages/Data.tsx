@@ -52,7 +52,10 @@ const Data = () => {
       const response = await fetch(ApiEndpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(fetchData), // 送信するデータをセット
+        body: JSON.stringify({
+          ...fetchData,
+          id: `${targetUser.sid}_${targetUser.username}_${targetUser.hostname}`,
+        }), // 送信するデータをセット
       });
 
       if (response.ok) {
