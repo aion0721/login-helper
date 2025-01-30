@@ -14,7 +14,7 @@ const Data = () => {
     try {
       const config = await invoke<Config>("get_config");
       const response = await fetch(
-        `${config.user_data_api}?id=${targetUser.sid}_${targetUser.hostname}_${targetUser.username}`,
+        `${config.user_data_api}?id=${targetUser.sid}_${targetUser.username}_${targetUser.hostname}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
