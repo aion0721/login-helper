@@ -12,6 +12,7 @@ pub struct Config {
     pub default_login_user: String,
     pub default_login_su: String,
     pub default_login_win: String,
+    pub default_login_oc: String,
 }
 
 pub fn load_config() -> Config {

@@ -162,8 +162,12 @@ const Home: React.FC = () => {
     navigate("/server");
   };
 
-  // ログインボタン押下時の処理
-  const handleLogin = async (server: ServerInfo) => {
+  type LoginType = "default" | "su" | "win";
+
+  const handleLoginGeneric = async (
+    server: ServerInfo,
+    loginType: LoginType
+  ) => {
     try {
       const response = await fetch(
         `${config?.user_data_api}?hostname=${server?.hostname}`,
@@ -175,96 +179,62 @@ const Home: React.FC = () => {
 
       const users: UserInfo[] = await response.json();
 
-      const defaultUser = users.find(
-        (user) => user.username === config?.default_login_user
-      );
+      let defaultUser: UserInfo | undefined;
+      let suUser: UserInfo | undefined;
+
+      // デフォルトユーザーの取得
+      switch (loginType) {
+        case "default":
+          defaultUser = users.find(
+            (user) => user.username === config?.default_login_user
+          );
+          break;
+        case "su":
+          defaultUser = users.find(
+            (user) => user.username === config?.default_login_user
+          );
+          suUser = users.find(
+            (user) => user.username === config?.default_login_su
+          );
+          break;
+        case "win":
+          defaultUser = users.find(
+            (user) => user.username === config?.default_login_win
+          );
+          break;
+        default:
+          throw new Error("無効なログインタイプです");
+      }
 
       if (!defaultUser) {
-        console.log(response);
         throw new Error("デフォルトユーザが見つかりません");
       }
 
-      await invoke("teraterm", {
-        ip: server?.ip,
-        password: defaultUser.password,
-        username: defaultUser.username,
-      });
-    } catch (error) {
-      console.error("ログインエラー:", error);
-      alert("ログイン失敗" + error);
-    }
-  };
-
-  // ログインボタン押下時の処理
-  const handleLoginSu = async (server: ServerInfo) => {
-    try {
-      const response = await fetch(
-        `${config?.user_data_api}?hostname=${server?.hostname}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      const users: UserInfo[] = await response.json();
-
-      const defaultUser = users.find(
-        (user) => user.username === config?.default_login_user
-      );
-
-      if (!defaultUser) {
-        console.log(response);
-        throw new Error("デフォルトユーザが見つかりません");
-      }
-      // SUユーザーを検索
-      const suUser = users.find(
-        (user) => user.username === config?.default_login_su
-      );
-      if (!suUser) {
+      if (loginType === "su" && !suUser) {
         throw new Error("SUユーザが見つかりません");
       }
 
-      await invoke("teraterm", {
-        ip: server?.ip,
-        password: defaultUser.password,
-        username: defaultUser.username,
-        suUsername: suUser.username, // suユーザ名
-        suPassword: suUser.password, // suユーザのパスワード
-        isSu: true,
-      });
-    } catch (error) {
-      console.error("ログインエラー:", error);
-      alert("ログイン失敗" + error);
-    }
-  };
-
-  // ログインボタン押下時の処理
-  const handleLoginWin = async (server: ServerInfo) => {
-    try {
-      const response = await fetch(
-        `${config?.user_data_api}?hostname=${server?.hostname}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      const users: UserInfo[] = await response.json();
-
-      const defaultUser = users.find(
-        (user) => user.username === config?.default_login_win
-      );
-
-      if (!defaultUser) {
-        console.log(response);
-        throw new Error("デフォルトユーザが見つかりません");
+      // invoke の呼び出し
+      if (loginType === "win") {
+        await invoke("rdp_login", {
+          ip: server?.ip,
+          password: defaultUser.password,
+          username: defaultUser.username,
+        });
+      } else {
+        await invoke("teraterm", {
+          ip: server?.ip,
+          password: defaultUser.password,
+          username: defaultUser.username,
+          ...(loginType === "su" && suUser
+            ? {
+                suUsername: suUser.username,
+                suPassword: suUser.password,
+                isSu: true,
+              }
+            : {}),
+        });
       }
-
-      await invoke("rdp_login", {
-        ip: server?.ip,
-        password: defaultUser.password,
-        username: defaultUser.username,
-      });
     } catch (error) {
       console.error("ログインエラー:", error);
       alert("ログイン失敗" + error);
@@ -357,7 +327,9 @@ const Home: React.FC = () => {
                             >
                               <Button
                                 colorPalette="cyan"
-                                onClick={() => handleLogin(server)}
+                                onClick={() =>
+                                  handleLoginGeneric(server, "default")
+                                }
                               >
                                 <CiServer />
                                 Login
@@ -369,7 +341,7 @@ const Home: React.FC = () => {
                             >
                               <Button
                                 colorPalette="teal"
-                                onClick={() => handleLoginSu(server)}
+                                onClick={() => handleLoginGeneric(server, "su")}
                               >
                                 <CiLock />
                                 SuLogin
@@ -381,7 +353,9 @@ const Home: React.FC = () => {
                             >
                               <Button
                                 colorPalette="red"
-                                onClick={() => handleLoginWin(server)}
+                                onClick={() =>
+                                  handleLoginGeneric(server, "win")
+                                }
                               >
                                 <CiDesktop />
                                 WinLogin

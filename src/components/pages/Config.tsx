@@ -57,6 +57,10 @@ const Config: React.FC = () => {
             <Table.Cell>default_login_win</Table.Cell>
             <Table.Cell>{config?.default_login_win}</Table.Cell>
           </Table.Row>
+          <Table.Row>
+            <Table.Cell>default_login_oc</Table.Cell>
+            <Table.Cell>{config?.default_login_oc}</Table.Cell>
+          </Table.Row>
         </Table.Body>
       </Table.Root>
     </motion.div>
