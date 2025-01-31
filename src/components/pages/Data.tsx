@@ -1,10 +1,11 @@
 import React from "react";
-import { Box, Button, Heading, Input, VStack } from "@chakra-ui/react";
+import { Box, Button, Input, Tabs, VStack } from "@chakra-ui/react";
 import { Field } from "../ui/field";
 import { motion } from "framer-motion";
 import type { UserInfo, Config } from "../../types";
 import { invoke } from "@tauri-apps/api/core";
 import { toaster, Toaster } from "../ui/toaster";
+import { CiServer, CiUser } from "react-icons/ci";
 
 const Data = () => {
   const [targetUser, setTargetUser] = React.useState<UserInfo>({} as UserInfo);
@@ -82,94 +83,108 @@ const Data = () => {
       transition={{ duration: 0.5 }}
     >
       <Toaster />
-      <Heading>Data</Heading>
-      <Box maxW="md" mx="auto" mt={10}>
-        <VStack>
-          {/* SID フィールド */}
-          <Field label="sid">
-            <Input
-              id="sid"
-              value={targetUser.sid || ""} // targetUser の sid プロパティをバインド
-              onChange={(e) =>
-                setTargetUser((prev) => ({
-                  ...prev, // 既存のプロパティを維持
-                  sid: e.target.value, // sid を更新
-                }))
-              }
-            />
-          </Field>
-
-          {/* Hostname フィールド */}
-          <Field label="hostname">
-            <Input
-              id="hostname"
-              value={targetUser.hostname || ""} // targetUser の sid プロパティをバインド
-              onChange={(e) =>
-                setTargetUser((prev) => ({
-                  ...prev, // 既存のプロパティを維持
-                  hostname: e.target.value, // sid を更新
-                }))
-              }
-            />
-          </Field>
-
-          {/* username フィールド */}
-          <Field label="username">
-            <Input
-              id="username"
-              value={targetUser.username || ""} // targetUser の sid プロパティをバインド
-              onChange={(e) =>
-                setTargetUser((prev) => ({
-                  ...prev, // 既存のプロパティを維持
-                  username: e.target.value, // sid を更新
-                }))
-              }
-            />
-          </Field>
-
-          {/* Submit ボタン */}
-          <Button
-            w={"100%"}
-            colorPalette="teal"
-            onClick={() => {
-              getUserData();
-            }}
-          >
-            Search User
-          </Button>
-
-          {fetchData && (
-            <>
-              <Field label="password">
+      <Tabs.Root defaultValue="server" justify="center">
+        <Tabs.List>
+          <Tabs.Trigger value="server">
+            <CiServer />
+            Server
+          </Tabs.Trigger>
+          <Tabs.Trigger value="user">
+            <CiUser />
+            User
+          </Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="server">Server</Tabs.Content>
+        <Tabs.Content value="user">
+          <Box maxW="md" mx="auto" mt={10}>
+            <VStack>
+              {/* SID フィールド */}
+              <Field label="sid">
                 <Input
-                  id="password"
-                  value={fetchData?.password || ""} // fetchData.password が未定義の場合は空文字列
+                  id="sid"
+                  value={targetUser.sid || ""} // targetUser の sid プロパティをバインド
                   onChange={(e) =>
-                    setFetchData((prev) => ({
-                      ...targetUser,
-                      ...prev, // prev は常にオブジェクトとして扱える
-                      password: e.target.value,
+                    setTargetUser((prev) => ({
+                      ...prev, // 既存のプロパティを維持
+                      sid: e.target.value, // sid を更新
+                    }))
+                  }
+                />
+              </Field>
+
+              {/* Hostname フィールド */}
+              <Field label="hostname">
+                <Input
+                  id="hostname"
+                  value={targetUser.hostname || ""} // targetUser の sid プロパティをバインド
+                  onChange={(e) =>
+                    setTargetUser((prev) => ({
+                      ...prev, // 既存のプロパティを維持
+                      hostname: e.target.value, // sid を更新
+                    }))
+                  }
+                />
+              </Field>
+
+              {/* username フィールド */}
+              <Field label="username">
+                <Input
+                  id="username"
+                  value={targetUser.username || ""} // targetUser の sid プロパティをバインド
+                  onChange={(e) =>
+                    setTargetUser((prev) => ({
+                      ...prev, // 既存のプロパティを維持
+                      username: e.target.value, // sid を更新
                     }))
                   }
                 />
               </Field>
 
               {/* Submit ボタン */}
-
               <Button
                 w={"100%"}
                 colorPalette="teal"
                 onClick={() => {
-                  pushUserData();
+                  getUserData();
                 }}
-                disabled={!fetchData.password}
               >
-                {!fetchData.id ? "Create" : "Update"} User Data
+                Search User
               </Button>
-            </>
-          )}
-        </VStack>
-      </Box>
+
+              {fetchData && (
+                <>
+                  <Field label="password">
+                    <Input
+                      id="password"
+                      value={fetchData?.password || ""} // fetchData.password が未定義の場合は空文字列
+                      onChange={(e) =>
+                        setFetchData((prev) => ({
+                          ...targetUser,
+                          ...prev, // prev は常にオブジェクトとして扱える
+                          password: e.target.value,
+                        }))
+                      }
+                    />
+                  </Field>
+
+                  {/* Submit ボタン */}
+
+                  <Button
+                    w={"100%"}
+                    colorPalette="teal"
+                    onClick={() => {
+                      pushUserData();
+                    }}
+                    disabled={!fetchData.password}
+                  >
+                    {!fetchData.id ? "Create" : "Update"} User Data
+                  </Button>
+                </>
+              )}
+            </VStack>
+          </Box>
+        </Tabs.Content>
+      </Tabs.Root>
     </motion.div>
   );
 };
