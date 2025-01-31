@@ -58,8 +58,16 @@ const Config: React.FC = () => {
             <Table.Cell>{config?.default_login_win}</Table.Cell>
           </Table.Row>
           <Table.Row>
-            <Table.Cell>default_login_oc</Table.Cell>
-            <Table.Cell>{config?.default_login_oc}</Table.Cell>
+            <Table.Cell>default_login_oc_url</Table.Cell>
+            <Table.Cell>{config?.default_login_oc_url}</Table.Cell>
+          </Table.Row>
+          <Table.Row>
+            <Table.Cell>default_login_oc_user</Table.Cell>
+            <Table.Cell>{config?.default_login_oc_user}</Table.Cell>
+          </Table.Row>
+          <Table.Row>
+            <Table.Cell>default_login_oc_id</Table.Cell>
+            <Table.Cell>{config?.default_login_oc_id}</Table.Cell>
           </Table.Row>
         </Table.Body>
       </Table.Root>

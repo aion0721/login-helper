@@ -44,9 +44,15 @@ const Home: React.FC = () => {
 
   const [filterValue, setFilterValue] = useState<string>("");
 
-  const ocUser = config?.default_login_oc
-    ? config.default_login_oc.replace(/\[sid\]/g, Sid.toLowerCase())
+  const ocUser = config?.default_login_oc_user
+    ? config.default_login_oc_user.replace(/\[sid\]/g, Sid.toLowerCase())
     : null;
+
+  const ocId = config?.default_login_oc_id
+    ? config.default_login_oc_id.replace(/\[sid\]/g, Sid.toLowerCase())
+    : null;
+
+  const ocUrl = config?.default_login_oc_url ?? null;
 
   // Modify the filtering logic
   const displayedServers = filteredServers.filter((server) => {
@@ -190,6 +196,23 @@ const Home: React.FC = () => {
       let defaultUser: UserInfo | undefined;
       let suUser: UserInfo | undefined;
 
+      // APIからユーザーデータを取得
+      const ocResponse = await fetch(`${config?.user_data_api}?id=${ocId}`, {
+        method: "GET", // 必要に応じて GET に変更
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      // 応答が正常か確認
+      if (!response.ok) {
+        throw new Error(`HTTPエラー: ${response.status}`);
+      }
+
+      // JSONデータをパース
+      const ocData = await ocResponse.json();
+      console.log(ocData);
+
       // デフォルトユーザーの取得
       switch (loginType) {
         case "default":
@@ -238,6 +261,10 @@ const Home: React.FC = () => {
           ip: server?.ip,
           password: defaultUser.password,
           username: defaultUser.username,
+          isOc: ocChecked,
+          ocUrl: ocUrl,
+          ocUser: ocUser,
+          ocPassword: ocData[0].password,
           ...(loginType === "su" && suUser
             ? {
                 suUsername: suUser.username,

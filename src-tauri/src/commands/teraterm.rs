@@ -38,6 +38,10 @@ pub async fn teraterm(
     su_username: Option<String>, // su_usernameはオプション型に
     su_password: Option<String>, // su_passwordもオプション型に
     is_su: Option<bool>,         // suコマンドを実行するかどうかのフラグ（オプション型）
+    oc_url: Option<String>,      // oc_urlはオプション型に
+    oc_user: Option<String>,     // oc_userもオプション型に
+    oc_password: Option<String>, // oc_passwordもオプション型に
+    is_oc: Option<bool>,         // ocコマンドを実行するかどうかのフラグ（オプション型）
     state: State<'_, AppState>,
 ) -> Result<(), String> {
     let shell = app_handle.shell();
@@ -45,6 +49,7 @@ pub async fn teraterm(
 
     // is_suが未定義の場合はデフォルトでfalse
     let is_su = is_su.unwrap_or(false);
+    let is_oc = is_oc.unwrap_or(false);
 
     // パスワードを「#ASCIIコード」形式に変換
     let ascii_password = convert_password_to_macro_format(&password, true);
@@ -80,11 +85,29 @@ pub async fn teraterm(
 
             ; 必要な後続処理をここに記述可能
             sendln 'whoami'
+            wait '#'
             "#,
             su_username = su_username.unwrap_or_else(|| "".to_string()),
             su_password = ascii_su_password,
         );
         macro_content.push_str(&su_commands);
+    }
+
+    //is_ocがtrueの場合、ocコマンド処理を追記
+    if is_oc {
+        let oc_commands = format!(
+            r#"
+            ; suコマンドの実行
+            sendln "oc login {oc_url} --username {oc_user} --password '{oc_password}'"
+
+            ; suコマンド成功確認（プロンプトが変わることを想定）
+            wait '#'
+            "#,
+            oc_url = oc_url.unwrap_or_else(|| "".to_string()),
+            oc_user = oc_user.unwrap_or_else(|| "".to_string()),
+            oc_password = oc_password.unwrap_or_else(|| "".to_string()),
+        );
+        macro_content.push_str(&oc_commands);
     }
 
     // 最後にendを追加
