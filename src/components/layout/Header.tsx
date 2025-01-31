@@ -5,6 +5,7 @@ import { Link as ReactRouterLink } from "react-router-dom";
 import logo from "../../assets/logo.webp";
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { ColorModeButton } from "../ui/color-mode";
 
 const Header: React.FC = () => {
   const [loginUser, setLoginUser] = useState<string>("");
@@ -18,7 +19,7 @@ const Header: React.FC = () => {
       });
   }, []);
   return (
-    <Flex as="header" bg="teal.500" color="white" p={4} align="center">
+    <Flex as="header" bg="teal.500" color="white" p={4} align="center" gap="4">
       {/* ロゴ部分 */}
       <Flex align="center" gap={2}>
         <Image src={logo} alt="Logo" boxSize="40px" />
@@ -26,7 +27,7 @@ const Header: React.FC = () => {
       </Flex>
 
       {/* Spacerで左右の要素を分ける */}
-      <Flex flex="1" justify="flex-end" gap={4}>
+      <Flex flex="1" justify="flex-end" gap="4">
         <Text>Welcome, {loginUser}!</Text>
         <ChakraLink asChild>
           <ReactRouterLink to="/">
@@ -47,6 +48,7 @@ const Header: React.FC = () => {
           </ReactRouterLink>
         </ChakraLink>
       </Flex>
+      <ColorModeButton />
     </Flex>
   );
 };
