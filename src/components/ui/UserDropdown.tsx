@@ -60,7 +60,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({
         </SelectTrigger>
         <SelectContent style={{ maxHeight: "200px", overflowY: "auto" }}>
           {userCollection.items.map((user) => (
-            <SelectItem key={user.value} item={user}>
+            <SelectItem key={user.userInfo.id} item={user}>
               {user.label}
             </SelectItem>
           ))}
