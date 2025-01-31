@@ -214,11 +214,9 @@ const Home: React.FC = () => {
         throw new Error(`HTTPエラー: ${response.status}`);
       }
 
-      console.log(ocResponse);
-
       // JSONデータをパース
       const ocData = await ocResponse.json();
-      const ocPassword = ocData[0].password ?? "";
+      const ocPassword = ocData.length > 0 ? ocData[0].password ?? "" : "";
 
       // デフォルトユーザーの取得
       switch (loginType) {
