@@ -44,12 +44,17 @@ const Home: React.FC = () => {
 
   const [filterValue, setFilterValue] = useState<string>("");
 
+  const extractedSid = Sid.length === 6 ? Sid.substring(2, 5) : Sid;
+
   const ocUser = config?.default_login_oc_user
-    ? config.default_login_oc_user.replace(/\[sid\]/g, Sid.toLowerCase())
+    ? config.default_login_oc_user.replace(
+        /\[sid\]/g,
+        extractedSid.toLowerCase()
+      )
     : null;
 
   const ocId = config?.default_login_oc_id
-    ? config.default_login_oc_id.replace(/\[sid\]/g, Sid.toLowerCase())
+    ? config.default_login_oc_id.replace(/\[sid\]/g, extractedSid.toLowerCase())
     : null;
 
   const ocUrl = config?.default_login_oc_url ?? null;
@@ -205,13 +210,15 @@ const Home: React.FC = () => {
       });
 
       // 応答が正常か確認
-      if (!response.ok) {
+      if (!ocResponse.ok) {
         throw new Error(`HTTPエラー: ${response.status}`);
       }
 
+      console.log(ocResponse);
+
       // JSONデータをパース
       const ocData = await ocResponse.json();
-      console.log(ocData);
+      const ocPassword = ocData[0].password ?? "";
 
       // デフォルトユーザーの取得
       switch (loginType) {
@@ -264,7 +271,7 @@ const Home: React.FC = () => {
           isOc: ocChecked,
           ocUrl: ocUrl,
           ocUser: ocUser,
-          ocPassword: ocData[0].password,
+          ocPassword: ocPassword,
           ...(loginType === "su" && suUser
             ? {
                 suUsername: suUser.username,
