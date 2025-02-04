@@ -11,6 +11,7 @@ import {
   Field,
   Flex,
   Group,
+  ClipboardRoot,
 } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -29,6 +30,7 @@ import { listen } from "@tauri-apps/api/event";
 import { Toaster, toaster } from "../ui/toaster";
 import { Tooltip } from "../ui/tooltip";
 import { Checkbox } from "../ui/checkbox";
+import { ClipboardIconButton } from "../ui/clipboard";
 
 const Home: React.FC = () => {
   const { Sid, setSid, setSelectedServer } = useAppContext();
@@ -360,7 +362,7 @@ const Home: React.FC = () => {
           ) : (
             displayedServers.length > 0 && (
               <>
-                <Table.Root size="md">
+                <Table.Root size="md" interactive stickyHeader showColumnBorder>
                   <Table.Header>
                     <Table.Row>
                       <Table.ColumnHeader>Hostname</Table.ColumnHeader>
@@ -371,8 +373,16 @@ const Home: React.FC = () => {
                   <Table.Body>
                     {displayedServers.map((server) => (
                       <Table.Row key={server.ip}>
-                        <Table.Cell>{server.hostname}</Table.Cell>
-                        <Table.Cell>{server.ip}</Table.Cell>
+                        <Table.Cell>
+                          <ClipboardRoot value={server.hostname}>
+                            {server.hostname} <ClipboardIconButton />
+                          </ClipboardRoot>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <ClipboardRoot value={server.ip}>
+                            {server.ip} <ClipboardIconButton />
+                          </ClipboardRoot>
+                        </Table.Cell>
                         <Table.Cell>
                           <Stack direction="row" justify="center">
                             <Tooltip
@@ -381,6 +391,7 @@ const Home: React.FC = () => {
                             >
                               <Button
                                 colorPalette="cyan"
+                                size="sm"
                                 onClick={() =>
                                   handleLoginGeneric(server, "default")
                                 }
@@ -395,6 +406,7 @@ const Home: React.FC = () => {
                             >
                               <Button
                                 colorPalette="teal"
+                                size="sm"
                                 onClick={() => handleLoginGeneric(server, "su")}
                               >
                                 <CiLock />
@@ -407,6 +419,7 @@ const Home: React.FC = () => {
                             >
                               <Button
                                 colorPalette="red"
+                                size="sm"
                                 onClick={() =>
                                   handleLoginGeneric(server, "win")
                                 }
@@ -421,6 +434,7 @@ const Home: React.FC = () => {
                             >
                               <Button
                                 colorPalette="yellow"
+                                size="sm"
                                 onClick={() => handleServerSelect(server)}
                               >
                                 <CiUser />
