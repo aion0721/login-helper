@@ -1,6 +1,7 @@
 import { Box, Flex } from "@chakra-ui/react";
 import Header from "./Header";
 import Footer from "./Footer";
+import ScrollToTopButton from "./ScrollToTopButton";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
@@ -10,6 +11,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {children}
       </Box>
       <Footer />
+      <ScrollToTopButton />
     </Flex>
   );
 };
