@@ -1,0 +1,18 @@
+
+        ; 接続実行
+        connect 'rp.local:22 /ssh /2 /auth=password /user=login00 /passwd="'#97#97#97#34#34#97#97#97'" /F=teraterm_lh.ini'
+        
+            ; suコマンドの実行
+            wait '$'
+            sendln 'su - root'
+            wait 'パスワード'
+            sendln #114#97#115#112#98#101#114#114#121
+
+            ; suコマンド成功確認（プロンプトが変わることを想定）
+            wait '#'
+
+            ; 必要な後続処理をここに記述可能
+            sendln 'whoami'
+            wait '#'
+            
+end

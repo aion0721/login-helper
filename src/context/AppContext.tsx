@@ -1,10 +1,5 @@
 import { createContext, useContext, useState } from "react";
-
-interface ServerInfo {
-  sid: string;
-  ip: string;
-  hostname: string;
-}
+import { ServerInfo } from "../types";
 
 // コンテキストの型定義
 interface AppContextType {

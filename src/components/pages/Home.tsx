@@ -367,6 +367,7 @@ const Home: React.FC = () => {
                     <Table.Row>
                       <Table.ColumnHeader>Hostname</Table.ColumnHeader>
                       <Table.ColumnHeader>IP Address</Table.ColumnHeader>
+                      <Table.ColumnHeader>Memo</Table.ColumnHeader>
                       <Table.ColumnHeader>Action</Table.ColumnHeader>
                     </Table.Row>
                   </Table.Header>
@@ -381,6 +382,11 @@ const Home: React.FC = () => {
                         <Table.Cell>
                           <ClipboardRoot value={server.ip}>
                             {server.ip} <ClipboardIconButton />
+                          </ClipboardRoot>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <ClipboardRoot value={server.memo}>
+                            {server.memo} <ClipboardIconButton />
                           </ClipboardRoot>
                         </Table.Cell>
                         <Table.Cell>
