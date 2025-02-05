@@ -12,6 +12,7 @@ import {
   Flex,
   Group,
   ClipboardRoot,
+  parseColor,
 } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -31,12 +32,25 @@ import { Toaster, toaster } from "../ui/toaster";
 import { Tooltip } from "../ui/tooltip";
 import { Checkbox } from "../ui/checkbox";
 import { ClipboardIconButton } from "../ui/clipboard";
+import {
+  ColorPickerContent,
+  ColorPickerControl,
+  ColorPickerEyeDropper,
+  ColorPickerInput,
+  ColorPickerLabel,
+  ColorPickerRoot,
+  ColorPickerSliders,
+  ColorPickerSwatchGroup,
+  ColorPickerSwatchTrigger,
+  ColorPickerTrigger,
+} from "../ui/color-picker";
 
 const Home: React.FC = () => {
   const { Sid, setSid, setSelectedServer } = useAppContext();
   const [config, setConfig] = React.useState<Config | null>(null);
   const [loading, setLoading] = useState(false);
   const [ocChecked, setOcChecked] = useState(false);
+  const [terminalBg, setTerminalBg] = useState(parseColor("#000000"));
   // 状態管理
   const [filteredServers, setFilteredServers] = useState<ServerInfo[]>([]);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -256,6 +270,12 @@ const Home: React.FC = () => {
         console.log(ocUser);
       }
 
+      const bgColor = [
+        terminalBg.toJSON().r,
+        terminalBg.toJSON().g,
+        terminalBg.toJSON().b,
+      ].join(",");
+
       // invoke の呼び出し
       if (loginType === "win") {
         await invoke("rdp_login", {
@@ -272,6 +292,7 @@ const Home: React.FC = () => {
           ocUrl: ocUrl,
           ocUser: ocUser,
           ocPassword: ocPassword,
+          bgColor,
           ...(loginType === "su" && suUser
             ? {
                 suUsername: suUser.username,
@@ -338,6 +359,38 @@ const Home: React.FC = () => {
             >
               OC Login
             </Checkbox>
+            <ColorPickerRoot
+              size="xs"
+              value={terminalBg}
+              onValueChange={(e) => setTerminalBg(e.value)}
+            >
+              <ColorPickerLabel>背景色</ColorPickerLabel>
+              <ColorPickerControl>
+                <ColorPickerInput />
+                <ColorPickerTrigger />
+              </ColorPickerControl>
+              <ColorPickerContent>
+                <ColorPickerEyeDropper />
+                <ColorPickerSliders />
+                <ColorPickerSwatchGroup>
+                  {[
+                    "red",
+                    "blue",
+                    "green",
+                    "#ADD8E6",
+                    "#FAEBD7",
+                    "#F5F5F5",
+                    "#F0F8FF",
+                  ].map((item) => (
+                    <ColorPickerSwatchTrigger
+                      swatchSize="4.5"
+                      key={item}
+                      value={item}
+                    />
+                  ))}
+                </ColorPickerSwatchGroup>
+              </ColorPickerContent>
+            </ColorPickerRoot>
           </Group>
           <Field.Root marginTop={4}>
             <Box pos="relative" w="full">
