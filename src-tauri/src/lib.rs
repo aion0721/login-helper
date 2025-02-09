@@ -5,6 +5,11 @@ mod config;
 
 use config::{get_config, load_config, AppState};
 
+use tauri::{
+    tray::{TrayIconBuilder, TrayIconEvent},
+    Manager, WindowEvent,
+};
+
 #[tauri::command]
 fn get_user() -> String {
     match std::env::var("username") {
@@ -47,7 +52,31 @@ pub fn run() {
                 )?;
                 app.global_shortcut().register(ctrl_n_shortcut)?;
             }
+
+            // ここから新しいコードを追加
+            let _tray_icon = TrayIconBuilder::new()
+                .icon(app.default_window_icon().unwrap().clone())
+                .build(app)
+                .expect("Failed to build tray icon");
+
             Ok(())
+        })
+        .on_window_event(|app, event| {
+            if let WindowEvent::CloseRequested { api, .. } = event {
+                let app_handle = app.app_handle();
+                let window = app_handle.get_webview_window("main").unwrap();
+                window.hide().unwrap();
+                api.prevent_close(); // ウィンドウのクローズを防ぎ、非表示にする
+            }
+        })
+        .on_tray_icon_event(|app, event| match event {
+            TrayIconEvent::DoubleClick { .. } => {
+                let app_handle = app.app_handle();
+                let window = app_handle.get_webview_window("main").unwrap();
+                window.show().unwrap(); // トレイアイコンのダブルクリックでウィンドウを表示
+                window.set_focus().unwrap();
+            }
+            _ => {}
         })
         .manage(AppState { config })
         .plugin(tauri_plugin_opener::init())
