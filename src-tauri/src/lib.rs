@@ -6,6 +6,7 @@ mod config;
 use config::{get_config, load_config, AppState};
 
 use tauri::{
+    menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{TrayIconBuilder, TrayIconEvent},
     Manager, WindowEvent,
 };
@@ -25,36 +26,45 @@ pub fn run() {
         .setup(|app| {
             #[cfg(desktop)]
             {
-                use tauri::Manager; // Managerトレイトのインポート必須
                 use tauri_plugin_global_shortcut::{
                     Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState,
                 };
-
-                let ctrl_n_shortcut =
+                let show_window_shortcut =
                     Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::KeyE);
+
                 app.handle().plugin(
                     tauri_plugin_global_shortcut::Builder::new()
                         .with_handler(move |app, shortcut, event| {
-                            if shortcut == &ctrl_n_shortcut {
-                                if let ShortcutState::Pressed = event.state() {
-                                    // Option型の処理に変更
-                                    if let Some(main_window) = app.get_webview_window("main") {
-                                        if main_window.is_minimized().unwrap_or(false) {
-                                            let _ = main_window.unminimize();
-                                        }
-                                        let _ = main_window.show();
-                                        let _ = main_window.set_focus();
+                            println!("{:?}", shortcut);
+                            if shortcut == &show_window_shortcut {
+                                match event.state() {
+                                    ShortcutState::Pressed => {
+                                        let app_handle = app.app_handle();
+                                        let window = app_handle.get_webview_window("main").unwrap();
+                                        window.show().unwrap(); // トレイアイコンのダブルクリックでウィンドウを表示
+                                        window.set_focus().unwrap();
                                     }
+                                    // releasedは不要なのでDefaultCaseにまとめる
+                                    _ => {}
                                 }
                             }
                         })
                         .build(),
                 )?;
-                app.global_shortcut().register(ctrl_n_shortcut)?;
+
+                app.global_shortcut().register(show_window_shortcut)?;
             }
 
-            // ここから新しいコードを追加
+            // SystemTray関連
+            let open_i = MenuItem::with_id(app, "open", "表示", true, None::<&str>)?;
+            let quit_i = MenuItem::with_id(app, "quit", "終了", true, None::<&str>)?;
+            let separator = PredefinedMenuItem::separator(app)?; // セパレーターを作成
+            let menu = Menu::with_items(app, &[&open_i, &separator, &quit_i])?;
+
             let _tray_icon = TrayIconBuilder::new()
+                .menu(&menu)
+                .tooltip("LoginHelper")
+                .show_menu_on_left_click(false)
                 .icon(app.default_window_icon().unwrap().clone())
                 .build(app)
                 .expect("Failed to build tray icon");
@@ -77,6 +87,20 @@ pub fn run() {
                 window.set_focus().unwrap();
             }
             _ => {}
+        })
+        .on_menu_event(|app, event| match event.id.as_ref() {
+            "quit" => {
+                app.exit(0);
+            }
+            "open" => {
+                let app_handle = app.app_handle();
+                let window = app_handle.get_webview_window("main").unwrap();
+                window.show().unwrap(); // トレイアイコンのダブルクリックでウィンドウを表示
+                window.set_focus().unwrap();
+            }
+            _ => {
+                println!("menu item{:?} not handled", event.id);
+            }
         })
         .manage(AppState { config })
         .plugin(tauri_plugin_opener::init())
