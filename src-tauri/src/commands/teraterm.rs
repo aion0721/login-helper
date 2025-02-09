@@ -1,11 +1,11 @@
 use crate::AppState;
 use chrono::Local;
 use encoding_rs::SHIFT_JIS;
+use std::path::PathBuf;
 use std::{env, fs};
 use tauri::State;
 use tauri::{AppHandle, Emitter};
 use tauri_plugin_shell::ShellExt;
-use std::path::PathBuf;
 
 /// Convert password to Tera Term macro-compatible ASCII representation
 /// If `login_flag` is true, double quotes in the password are doubled.
@@ -42,7 +42,7 @@ pub async fn teraterm(
     oc_url: Option<String>,      // oc_urlはオプション型に
     oc_user: Option<String>,     // oc_userもオプション型に
     oc_password: Option<String>, // oc_passwordもオプション型に
-    bg_color: String, // oc_passwordもオプション型に
+    bg_color: String,            // oc_passwordもオプション型に
     is_oc: Option<bool>,         // ocコマンドを実行するかどうかのフラグ（オプション型）
     state: State<'_, AppState>,
 ) -> Result<(), String> {
@@ -131,8 +131,16 @@ pub async fn teraterm(
     macro_content.push_str("\nend\n");
 
     // 共通の実行関数を呼び出し
-    execute_teraterm_macro(&app_handle, &shell, ttpmacro_path, &macro_content, &ini_path, &bg_color).await
- }
+    execute_teraterm_macro(
+        &app_handle,
+        &shell,
+        ttpmacro_path,
+        &macro_content,
+        &ini_path,
+        &bg_color,
+    )
+    .await
+}
 
 pub async fn execute_teraterm_macro<R: tauri::Runtime>(
     app_handle: &AppHandle<R>,
@@ -191,10 +199,8 @@ pub async fn execute_teraterm_macro<R: tauri::Runtime>(
         .collect::<Vec<String>>()
         .join("\n");
 
-
     // マクロファイルを書き込み
     fs::write(&ini_path, &updated_content).map_err(|e| format!("File write error: {}", e))?;
-
 
     // Tera Termマクロ実行コマンド（ttpmacro.exe）
     let ttpmacro_status = shell
@@ -203,11 +209,15 @@ pub async fn execute_teraterm_macro<R: tauri::Runtime>(
         .output()
         .await
         .map_err(|e| format!("Macro execution error: {}", e))?;
-    
+
     if ttpmacro_status.status.success() {
         // 処理成功時にTTLファイルを削除
-        if let Err(e) = fs::remove_file(&macro_path) { return Err(format!("File deletion failed: {}", e)); }
-        if let Err(e) = fs::remove_file(&ini_path) { return Err(format!("File deletion failed: {}", e)); }
+        if let Err(e) = fs::remove_file(&macro_path) {
+            return Err(format!("File deletion failed: {}", e));
+        }
+        if let Err(e) = fs::remove_file(&ini_path) {
+            return Err(format!("File deletion failed: {}", e));
+        }
         // イベント送信
         app_handle
             .emit("rust_event", "ログイン処理が完了しました。")
