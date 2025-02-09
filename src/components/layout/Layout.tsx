@@ -7,7 +7,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <Flex direction="column" minH="100vh">
       <Header />
-      <Box flex="1" as="main" p={4}>
+      <Box flex="1" as="main" p={1}>
         {children}
       </Box>
       <Footer />

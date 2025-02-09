@@ -11,6 +11,7 @@ import {
   Flex,
   Group,
   parseColor,
+  Kbd,
 } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/core";
 import { CiEraser, CiSearch } from "react-icons/ci";
@@ -145,9 +146,14 @@ const Home: React.FC = () => {
       exit={{ opacity: 0, x: -100 }}
       transition={{ duration: 0.5 }}
     >
-      <Box p={5}>
+      <Box p={2}>
         <Toaster />
         <Stack>
+          <Text fontSize="sm" color="gray">
+            ウィンドウを閉じると常駐します。<Kbd>Ctrl</Kbd>+<Kbd>Alt</Kbd>+
+            <Kbd>E</Kbd>
+            でウィンドウを開きます。終了するにはタスクトレイを右クリックで「終了」
+          </Text>
           <Flex gap="4">
             <Field.Root>
               <Box pos="relative" w="full">
