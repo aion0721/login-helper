@@ -19,7 +19,7 @@ const Header: React.FC = () => {
       });
   }, []);
   return (
-    <Flex as="header" bg="teal.500" color="white" p={4} align="center" gap="4">
+    <Flex as="header" bg="teal.500" color="white" p={2} align="center" gap="4">
       {/* ロゴ部分 */}
       <Flex align="center" gap={2}>
         <Image src={logo} alt="Logo" boxSize="40px" />

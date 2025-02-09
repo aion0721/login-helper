@@ -227,7 +227,7 @@ const ServerTable: React.FC<ServerTableProps> = ({
                     onClick={() => handleLoginGeneric(server, "default")}
                   >
                     <CiServer />
-                    Login
+                    SSH
                   </Button>
                 </Tooltip>
                 <Tooltip
@@ -240,7 +240,7 @@ const ServerTable: React.FC<ServerTableProps> = ({
                     onClick={() => handleLoginGeneric(server, "su")}
                   >
                     <CiLock />
-                    SuLogin
+                    SSH(su)
                   </Button>
                 </Tooltip>
                 <Tooltip
@@ -253,7 +253,7 @@ const ServerTable: React.FC<ServerTableProps> = ({
                     onClick={() => handleLoginGeneric(server, "win")}
                   >
                     <CiDesktop />
-                    WinLogin
+                    Win(RDP)
                   </Button>
                 </Tooltip>
                 <Tooltip showArrow content="SwitchUser/ShowPassword">
@@ -263,7 +263,7 @@ const ServerTable: React.FC<ServerTableProps> = ({
                     onClick={() => handleServerSelect(server)}
                   >
                     <CiUser />
-                    SelectUser
+                    Detail
                   </Button>
                 </Tooltip>
               </Stack>
