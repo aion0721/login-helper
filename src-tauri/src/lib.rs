@@ -23,7 +23,7 @@ fn get_user() -> String {
 pub fn run() {
     let config = load_config();
     tauri::Builder::default()
-        .setup(|app| {
+            .setup(|app| {
             #[cfg(desktop)]
             {
                 use tauri_plugin_global_shortcut::{
@@ -40,11 +40,15 @@ pub fn run() {
                                 match event.state() {
                                     ShortcutState::Pressed => {
                                         let app_handle = app.app_handle();
-                                        let window = app_handle.get_webview_window("main").unwrap();
-                                        window.show().unwrap(); // トレイアイコンのダブルクリックでウィンドウを表示
-                                        window.set_focus().unwrap();
+                                        if let Some(window) = app_handle.get_webview_window("main") {
+                                            // ウィンドウが最小化されている場合でも表示
+                                            if window.is_minimized().unwrap_or(false) {
+                                                window.unminimize().unwrap();
+                                            }
+                                            window.show().unwrap();
+                                            window.set_focus().unwrap();
+                                        }
                                     }
-                                    // releasedは不要なのでDefaultCaseにまとめる
                                     _ => {}
                                 }
                             }
