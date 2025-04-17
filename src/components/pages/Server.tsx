@@ -117,6 +117,9 @@ const Server: React.FC = () => {
     try {
       await invoke("teraterm", {
         ip: selectedServer?.ip,
+        sid: selectedServer?.sid,
+        hostname: selectedServer?.hostname,
+        memo: selectedServer?.memo,
         password: user.password,
         username: user.username,
         bgColor: "black",
@@ -132,6 +135,9 @@ const Server: React.FC = () => {
     try {
       await invoke("teraterm", {
         ip: selectedServer?.ip,
+        sid: selectedServer?.sid,
+        hostname: selectedServer?.hostname,
+        memo: selectedServer?.memo,
         password: user.password,
         username: user.username,
         suUsername: suUser.username, // suユーザ名

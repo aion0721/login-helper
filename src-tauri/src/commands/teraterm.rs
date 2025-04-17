@@ -36,13 +36,16 @@ pub async fn teraterm(
     ip: String,
     username: String,
     password: String,
+    sid: String, 
+    hostname: String, 
+    memo: String, 
     su_username: Option<String>, // su_usernameはオプション型に
     su_password: Option<String>, // su_passwordもオプション型に
     is_su: Option<bool>,         // suコマンドを実行するかどうかのフラグ（オプション型）
     oc_url: Option<String>,      // oc_urlはオプション型に
     oc_user: Option<String>,     // oc_userもオプション型に
     oc_password: Option<String>, // oc_passwordもオプション型に
-    bg_color: String,            // oc_passwordもオプション型に
+    bg_color: String,            // bg_colorもオプション型に
     is_oc: Option<bool>,         // ocコマンドを実行するかどうかのフラグ（オプション型）
     state: State<'_, AppState>,
 ) -> Result<(), String> {
@@ -126,6 +129,18 @@ pub async fn teraterm(
         );
         macro_content.push_str(&oc_commands);
     }
+
+    let set_title = format!(
+        r#"
+        ; ウィンドウタイトル変更
+        settitle '[{sid}] {hostname} ({memo})'
+
+        "#,
+        sid = sid,
+        hostname = hostname,
+        memo = memo,
+    );
+    macro_content.push_str(&set_title);
 
     // 最後にendを追加
     macro_content.push_str("\nend\n");

@@ -165,6 +165,9 @@ const ServerTable: React.FC<ServerTableProps> = ({
       } else {
         await invoke("teraterm", {
           ip: server?.ip,
+          sid: server?.sid,
+          hostname: server?.hostname,
+          memo: server?.memo,
           password: defaultUser.password,
           username: defaultUser.username,
           isOc: ocChecked,
