@@ -19,8 +19,6 @@ import UserDropdown from "../ui/UserDropdown";
 const Server: React.FC = () => {
   const { selectedServer } = useAppContext();
 
-  // サーバ情報とユーザ情報のモックデータ
-
   // 状態管理
   const [selectedUser, setSelectedUser] = useState<UserInfo | null>(null);
   const [selectedSuUser, setSelectedSuUser] = useState<UserInfo | null>(null);
@@ -121,6 +119,7 @@ const Server: React.FC = () => {
         ip: selectedServer?.ip,
         password: user.password,
         username: user.username,
+        bgColor: "black",
       });
     } catch (error) {
       console.error("ログインエラー:", error);
@@ -137,6 +136,7 @@ const Server: React.FC = () => {
         username: user.username,
         suUsername: suUser.username, // suユーザ名
         suPassword: suUser.password, // suユーザのパスワード
+        bgColor: "black",
         isSu: true,
       });
     } catch (error) {
