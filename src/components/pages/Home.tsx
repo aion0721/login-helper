@@ -33,6 +33,7 @@ import {
   ColorPickerSwatchTrigger,
   ColorPickerTrigger,
 } from "../ui/color-picker";
+import { Tooltip } from "../ui/tooltip";
 
 const LazyServerTable = React.lazy(() => import("../parts/ServerTable"));
 
@@ -42,6 +43,7 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [ocChecked, setOcChecked] = useState(false);
   const [terminalBg, setTerminalBg] = useState(parseColor("#000000"));
+  const [scriptChecked, setScriptChecked] = useState(true);
   // 状態管理
   const [filteredServers, setFilteredServers] = useState<ServerInfo[]>([]);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -183,12 +185,30 @@ const Home: React.FC = () => {
 
           <Group direction="row">
             <Text>Options</Text>
-            <Checkbox
-              checked={ocChecked}
-              onCheckedChange={(e) => setOcChecked(!!e.checked)}
+            <Tooltip
+              ids={{ trigger: "oc" }}
+              content="自動でOCログインを行います"
             >
-              OC Login
-            </Checkbox>
+              <Checkbox
+                ids={{ root: "oc" }}
+                checked={ocChecked}
+                onCheckedChange={(e) => setOcChecked(!!e.checked)}
+              >
+                OC Login
+              </Checkbox>
+            </Tooltip>
+            <Tooltip
+              ids={{ trigger: "script" }}
+              content="自動で/tmpに作業ログを記録します"
+            >
+              <Checkbox
+                ids={{ root: "script" }}
+                checked={scriptChecked}
+                onCheckedChange={(e) => setScriptChecked(!!e.checked)}
+              >
+                作業ログ取得
+              </Checkbox>
+            </Tooltip>
             <ColorPickerRoot
               size="xs"
               value={terminalBg}
@@ -256,6 +276,7 @@ const Home: React.FC = () => {
                   displayedServers={displayedServers}
                   config={config}
                   ocChecked={ocChecked}
+                  scriptChecked={scriptChecked}
                   terminalBg={terminalBg}
                 />
               </Suspense>

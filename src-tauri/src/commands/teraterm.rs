@@ -43,6 +43,7 @@ pub async fn teraterm(
     su_username: Option<String>, // su_usernameはオプション型に
     su_password: Option<String>, // su_passwordもオプション型に
     is_su: Option<bool>,         // suコマンドを実行するかどうかのフラグ（オプション型）
+    is_script: Option<bool>,     // suコマンドを実行するかどうかのフラグ（オプション型）
     oc_url: Option<String>,      // oc_urlはオプション型に
     oc_user: Option<String>,     // oc_userもオプション型に
     oc_password: Option<String>, // oc_passwordもオプション型に
@@ -61,6 +62,7 @@ pub async fn teraterm(
     // is_suが未定義の場合はデフォルトでfalse
     let is_su = is_su.unwrap_or(false);
     let is_oc = is_oc.unwrap_or(false);
+    let is_script = is_script.unwrap_or(true);
 
     // パスワードを「#ASCIIコード」形式に変換
     let ascii_password = convert_password_to_macro_format(&password, true);
@@ -96,16 +98,18 @@ pub async fn teraterm(
         ini_path = ini_path.to_string_lossy()
     );
 
-    let script_do = format!(
-        r#"
+    if is_script {
+        let script_do = format!(
+            r#"
             ; suコマンドの実行
             wait '$'
             sendln 'script /tmp/teraterm_`hostname`_{login_username}_{timestamp}.log'
             "#,
-        login_username = login_username,
-        timestamp = timestamp
-    );
-    macro_content.push_str(&script_do);
+            login_username = login_username,
+            timestamp = timestamp
+        );
+        macro_content.push_str(&script_do);
+    }
 
     // is_suがtrueの場合、suコマンド処理を追記
     if is_su {

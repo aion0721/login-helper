@@ -11,6 +11,7 @@ interface ServerTableProps {
   displayedServers: ServerInfo[];
   config: Config | null;
   ocChecked: boolean;
+  scriptChecked: boolean;
   terminalBg: Color;
 }
 
@@ -18,6 +19,7 @@ const ServerTable: React.FC<ServerTableProps> = ({
   displayedServers,
   config,
   ocChecked,
+  scriptChecked,
   terminalBg,
 }) => {
   const { Sid, setSelectedServer } = useAppContext();
@@ -171,6 +173,7 @@ const ServerTable: React.FC<ServerTableProps> = ({
           password: defaultUser.password,
           username: defaultUser.username,
           isOc: ocChecked,
+          isScript: scriptChecked,
           ocUrl: ocUrl,
           ocUser: ocUser,
           ocPassword: ocPassword,
