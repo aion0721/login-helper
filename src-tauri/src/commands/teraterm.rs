@@ -1,3 +1,4 @@
+use crate::get_user;
 use crate::AppState;
 use chrono::Local;
 use encoding_rs::SHIFT_JIS;
@@ -36,9 +37,9 @@ pub async fn teraterm(
     ip: String,
     username: String,
     password: String,
-    sid: String, 
-    hostname: String, 
-    memo: String, 
+    sid: String,
+    hostname: String,
+    memo: String,
     su_username: Option<String>, // su_usernameはオプション型に
     su_password: Option<String>, // su_passwordもオプション型に
     is_su: Option<bool>,         // suコマンドを実行するかどうかのフラグ（オプション型）
@@ -51,6 +52,11 @@ pub async fn teraterm(
 ) -> Result<(), String> {
     let shell = app_handle.shell();
     let ttpmacro_path = &state.config.ttpmacro_path;
+    let login_username = get_user();
+
+    // 現在の日付と時刻を取得（ミリ秒まで）
+    let now = Local::now();
+    let timestamp = now.format("%Y%m%d%H%M").to_string();
 
     // is_suが未定義の場合はデフォルトでfalse
     let is_su = is_su.unwrap_or(false);
@@ -89,6 +95,17 @@ pub async fn teraterm(
         password = ascii_password,
         ini_path = ini_path.to_string_lossy()
     );
+
+    let script_do = format!(
+        r#"
+            ; suコマンドの実行
+            wait '$'
+            sendln 'script /tmp/teraterm_`hostname`_{login_username}_{timestamp}.log'
+            "#,
+        login_username = login_username,
+        timestamp = timestamp
+    );
+    macro_content.push_str(&script_do);
 
     // is_suがtrueの場合、suコマンド処理を追記
     if is_su {
